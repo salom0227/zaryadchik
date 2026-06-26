@@ -15,6 +15,7 @@ const stationRoutes = require('./routes/stations');
 const bookingRoutes = require('./routes/bookings');
 const adminRoutes = require('./routes/admin');
 const miscRoutes = require('./routes/misc');
+const paymentRoutes = require('./routes/payments');
 
 const app = express();
 const server = http.createServer(app);
@@ -49,6 +50,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/stations', stationRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/payments', paymentRoutes);
 app.use('/api', miscRoutes);
 
 // Error handling middleware

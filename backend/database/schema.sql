@@ -67,6 +67,12 @@ CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
 CREATE INDEX IF NOT EXISTS idx_bookings_booking_time ON bookings(booking_time);
 CREATE INDEX IF NOT EXISTS idx_bookings_code ON bookings(booking_code);
 
+-- YANGI: Kartalar va to'lovlar indekslari
+CREATE INDEX IF NOT EXISTS idx_user_cards_user_id ON user_cards(user_id);
+CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
+CREATE INDEX IF NOT EXISTS idx_payments_card_id ON payments(card_id);
+CREATE INDEX IF NOT EXISTS idx_payments_booking_id ON payments(booking_id);
+
 -- Create function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -94,3 +100,46 @@ CREATE TRIGGER update_bookings_updated_at
     BEFORE UPDATE ON bookings
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
+
+-- YANGI: Foydalanuvchi kartalari jadvali
+CREATE TABLE IF NOT EXISTS user_cards (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    card_holder VARCHAR(100) NOT NULL,
+    card_number_encrypted TEXT NOT NULL,
+    card_last_four VARCHAR(4) NOT NULL,
+    card_expiry_month VARCHAR(2) NOT NULL,
+    card_expiry_year VARCHAR(4) NOT NULL,
+    is_default BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- YANGI: To'lovlar tarixi jadvali
+CREATE TABLE IF NOT EXISTS payments (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+    card_id INTEGER REFERENCES user_cards(id) ON DELETE SET NULL,
+    booking_id INTEGER REFERENCES bookings(id) ON DELETE SET NULL,
+    amount DECIMAL(12, 2) NOT NULL,
+    currency VARCHAR(3) DEFAULT 'UZS',
+    status VARCHAR(20) DEFAULT 'success' CHECK (status IN ('pending', 'success', 'failed')),
+    transaction_id VARCHAR(255),
+    description TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- YANGI: OTP kodlari (vaqtinchalik)
+CREATE TABLE IF NOT EXISTS otp_codes (
+    id SERIAL PRIMARY KEY,
+    phone VARCHAR(20) NOT NULL,
+    code VARCHAR(6) NOT NULL,
+    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    is_used BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+-- YANGI: Kartalar va to'lovlar indekslari
+CREATE INDEX IF NOT EXISTS idx_user_cards_user_id ON user_cards(user_id);
+CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
+CREATE INDEX IF NOT EXISTS idx_payments_card_id ON payments(card_id);
+CREATE INDEX IF NOT EXISTS idx_payments_booking_id ON payments(booking_id);
