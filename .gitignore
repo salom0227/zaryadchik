@@ -1,1 +1,5 @@
-Nothing needs to be added to the .gitignore file based on the provided file changes, as they consist only of source code files (.js, .sql) without any build artifacts, dependencies, or temporary files that should be ignored.
+```
+# Logs
+*.log
+backend/logs/
+```

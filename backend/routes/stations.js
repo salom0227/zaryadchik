@@ -40,6 +40,7 @@ router.get('/stats', StationController.getStats);
 router.get('/:id', StationController.getById);
 
 // POST /api/stations - Create new station (admin only)
+// Note: Admin can also use /api/admin/stations
 router.post('/',
   authMiddleware,
   adminMiddleware,
