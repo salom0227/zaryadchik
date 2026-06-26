@@ -1,0 +1,2761 @@
+
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ZaryadUz</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0f1a;
+    --bg2: #111827;
+    --bg3: #1a2234;
+    --card: #131d2e;
+    --border: rgba(255,255,255,0.08);
+    --border2: rgba(255,255,255,0.14);
+    --text: #f0f4ff;
+    --text2: #8b9ab5;
+    --text3: #5a6a82;
+    --green: #00d68f;
+    --green2: #00b377;
+    --blue: #3b82f6;
+    --blue2: #2563eb;
+    --amber: #f59e0b;
+    --red: #ef4444;
+    --purple: #8b5cf6;
+  }
+
+  body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+
+  /* AUTH SCREEN */
+  .auth-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0a0f1a 0%, #0d1b2e 50%, #0a1628 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .auth-screen::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(0,214,143,0.06) 0%, transparent 70%);
+    top: -200px; right: -200px;
+    pointer-events: none;
+  }
+
+  .auth-screen::after {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(59,130,246,0.05) 0%, transparent 70%);
+    bottom: -100px; left: -100px;
+    pointer-events: none;
+  }
+
+  .auth-card {
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 40px;
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    z-index: 1;
+    box-sizing: border-box;
+  }
+
+  @media (max-width: 420px) {
+    .auth-screen { padding: 16px; }
+    .auth-card { padding: 28px 20px; max-width: 100%; }
+  }
+
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+
+  .logo-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--green), var(--blue));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    color: white;
+  }
+
+  .logo-text { font-size: 22px; font-weight: 700; }
+  .logo-text span { color: var(--green); }
+
+  .auth-title { font-size: 20px; font-weight: 600; margin-bottom: 6px; }
+  .auth-sub { font-size: 14px; color: var(--text2); margin-bottom: 28px; }
+
+  .field-label { font-size: 13px; color: var(--text2); margin-bottom: 8px; font-weight: 500; }
+
+  .field-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 15px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .field-input:focus { border-color: var(--green); }
+  .field-input::placeholder { color: var(--text3); }
+
+  .field-row { margin-bottom: 16px; }
+
+  .phone-row { display: flex; gap: 8px; }
+  .country-code {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 15px;
+    color: var(--text);
+    white-space: nowrap;
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .sms-hint { font-size: 12px; color: var(--text3); margin-top: 6px; }
+
+  .otp-row { display: flex; gap: 8px; margin-bottom: 16px; }
+  .otp-input {
+    flex: 1;
+    min-width: 0;
+    width: 0;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 14px 4px;
+    font-size: 22px;
+    color: var(--text);
+    text-align: center;
+    outline: none;
+    font-weight: 600;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+  }
+  .otp-input:focus { border-color: var(--green); }
+
+  @media (max-width: 420px) {
+    .otp-row { gap: 6px; }
+    .otp-input { padding: 12px 0; font-size: 19px; }
+  }
+
+  .btn-primary {
+    width: 100%;
+    background: linear-gradient(135deg, var(--green), var(--green2));
+    color: #0a1628;
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+  }
+  .btn-primary:hover { opacity: 0.92; }
+  .btn-primary:active { transform: scale(0.99); }
+
+  .resend-row { text-align: center; margin-top: 14px; font-size: 13px; color: var(--text2); }
+  .resend-btn { color: var(--green); cursor: pointer; font-weight: 500; background: none; border: none; font-size: 13px; }
+
+  .step-indicator {
+    display: flex; gap: 6px; margin-bottom: 24px;
+  }
+  .step-dot { height: 4px; border-radius: 2px; transition: all 0.3s; }
+
+  /* MAIN APP */
+  .app { display: flex; flex-direction: column; height: 100vh; }
+
+  .topbar {
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    height: 58px;
+    display: flex; align-items: center; justify-content: space-between;
+    z-index: 100;
+  }
+
+  .topbar-logo { display: flex; align-items: center; gap: 10px; }
+  .topbar-logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, var(--green), var(--blue));
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: white;
+  }
+  .topbar-logo-text { font-size: 17px; font-weight: 700; }
+  .topbar-logo-text span { color: var(--green); }
+
+  .topbar-right { display: flex; align-items: center; gap: 8px; }
+
+  .icon-btn {
+    width: 36px; height: 36px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text2); font-size: 18px;
+    transition: background 0.2s, color 0.2s;
+  }
+  .icon-btn:hover { background: var(--border); color: var(--text); }
+
+  .avatar-btn {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--green), var(--blue));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 700; color: #0a1628;
+    cursor: pointer;
+  }
+
+  .main-content { display: flex; flex: 1; overflow: hidden; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 340px;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .sidebar-inner { flex: 1; overflow-y: auto; padding: 14px; }
+  .sidebar-inner::-webkit-scrollbar { width: 4px; }
+  .sidebar-inner::-webkit-scrollbar-track { background: transparent; }
+  .sidebar-inner::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .search-box {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+  }
+  .search-box i { color: var(--text3); font-size: 18px; }
+  .search-box input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-size: 14px;
+  }
+  .search-box input::placeholder { color: var(--text3); }
+
+  /* FILTER TABS */
+  .filter-section { margin-bottom: 14px; }
+  .filter-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px; }
+  .filter-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .chip {
+    display: flex; align-items: center; gap: 5px;
+    padding: 6px 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px; color: var(--text2);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .chip:hover { border-color: var(--border2); color: var(--text); }
+  .chip.active { background: rgba(0,214,143,0.1); border-color: var(--green); color: var(--green); }
+  .chip i { font-size: 14px; }
+
+  .section-title {
+    font-size: 12px; font-weight: 600; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    margin: 16px 0 10px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .section-count {
+    font-size: 12px; color: var(--text3);
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 2px 8px;
+  }
+
+  /* STATION CARD */
+  .station-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: border-color 0.2s, transform 0.1s;
+  }
+  .station-card:hover { border-color: var(--border2); }
+  .station-card.selected { border-color: var(--green); background: rgba(0,214,143,0.04); }
+  .station-card:active { transform: scale(0.99); }
+
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; }
+
+  .card-icon-wrap {
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .card-icon-wrap.ev { background: rgba(0,214,143,0.12); color: var(--green); }
+  .card-icon-wrap.power { background: rgba(245,158,11,0.12); color: var(--amber); }
+  .card-icon-wrap.scooter { background: rgba(139,92,246,0.12); color: var(--purple); }
+
+  .card-info { flex: 1; padding: 0 10px; }
+  .card-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+  .card-addr { font-size: 12px; color: var(--text2); }
+
+  .status-badge {
+    font-size: 11px; font-weight: 600;
+    padding: 4px 9px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+  .status-badge.open { background: rgba(0,214,143,0.12); color: var(--green); }
+  .status-badge.busy { background: rgba(245,158,11,0.12); color: var(--amber); }
+  .status-badge.closed { background: rgba(239,68,68,0.1); color: var(--red); }
+
+  .card-meta {
+    display: flex; gap: 12px; flex-wrap: wrap;
+  }
+  .meta-item {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 12px; color: var(--text2);
+  }
+  .meta-item i { font-size: 13px; }
+  .meta-item.green { color: var(--green); }
+  .meta-item.amber { color: var(--amber); }
+
+  .card-actions {
+    display: flex; gap: 6px; margin-top: 10px;
+  }
+
+  .btn-sm {
+    display: flex; align-items: center; gap: 5px;
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 12px; font-weight: 600;
+    cursor: pointer; border: none; transition: opacity 0.2s;
+  }
+  .btn-sm i { font-size: 14px; }
+  .btn-sm.green { background: var(--green); color: #0a1628; }
+  .btn-sm.green:hover { opacity: 0.88; }
+  .btn-sm.outline {
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    color: var(--text2);
+  }
+  .btn-sm.outline:hover { color: var(--text); }
+  .btn-sm.blue { background: var(--blue); color: white; }
+  .btn-sm.blue:hover { opacity: 0.88; }
+
+  /* MAP */
+  .map-area {
+    flex: 1;
+    background: var(--bg);
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  .map-canvas {
+    width: 100%; height: 100%;
+    position: relative;
+    background: #0d1521;
+  }
+
+  /* Leaflet dark theme overrides */
+  #leafletMap, #adminLeafletMap { background: #0d1521; }
+  .leaflet-container { background: #0d1521; font-family: inherit; }
+  .leaflet-tile-pane { filter: brightness(0.62) invert(1) contrast(3) hue-rotate(200deg) saturate(0.35) brightness(0.85); }
+  .leaflet-control-zoom, .leaflet-control-attribution { display: none !important; }
+  .leaflet-popup-content-wrapper { background: var(--bg2); color: var(--text); border-radius: 10px; border: 1px solid var(--border2); }
+  .leaflet-popup-tip { background: var(--bg2); }
+  .leaflet-popup-content { margin: 10px 12px; font-size: 13px; }
+
+  .station-pin {
+    width: 34px; height: 34px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid rgba(255,255,255,0.25);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  }
+  .station-pin i { transform: rotate(45deg); font-size: 15px; }
+  .station-pin.ev { background: var(--green); }
+  .station-pin.power { background: var(--amber); }
+  .station-pin.scooter { background: var(--purple); }
+  .station-pin.selected { border-color: white; box-shadow: 0 0 0 4px rgba(255,255,255,0.25); }
+
+  .user-pin-dot { width: 14px; height: 14px; background: var(--blue); border-radius: 50%; border: 2px solid white; box-shadow: 0 0 0 6px rgba(59,130,246,0.25); }
+
+  .map-popup-card { min-width: 170px; }
+  .map-popup-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+  .map-popup-addr { font-size: 11px; color: var(--text2); margin-bottom: 6px; }
+  .map-popup-meta { font-size: 11px; color: var(--text2); display:flex; gap:8px; margin-bottom: 8px; }
+  .map-popup-btn { background: var(--green); color: #0a1628; border: none; border-radius: 7px; padding: 6px 10px; font-size: 12px; font-weight: 700; cursor: pointer; width: 100%; }
+
+  /* SVG map background (legacy, unused but kept for safety) */
+  .map-svg { width: 100%; height: 100%; }
+
+  /* Map markers */
+  .map-marker {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+  .map-marker:hover { transform: translate(-50%, -100%) scale(1.15); }
+  .map-marker:hover .marker-tooltip { opacity: 1; pointer-events: auto; }
+
+  .marker-pin {
+    width: 36px; height: 36px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex; align-items: center; justify-content: center;
+    border: 2px solid rgba(255,255,255,0.2);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .marker-pin i { transform: rotate(45deg); font-size: 16px; }
+  .marker-pin.ev { background: var(--green); }
+  .marker-pin.power { background: var(--amber); }
+  .marker-pin.scooter { background: var(--purple); }
+  .marker-pin.selected { border-color: white; box-shadow: 0 0 0 3px rgba(255,255,255,0.3); }
+
+  .marker-tooltip {
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--card);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 6px 10px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  /* MAP CONTROLS */
+  .map-controls {
+    position: absolute;
+    right: 14px; top: 14px;
+    display: flex; flex-direction: column; gap: 4px;
+    z-index: 10;
+  }
+
+  .map-ctrl-btn {
+    width: 36px; height: 36px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; color: var(--text2); font-size: 18px;
+    transition: all 0.2s;
+  }
+  .map-ctrl-btn:hover { background: var(--bg3); color: var(--text); }
+
+  /* MAP LEGEND */
+  .map-legend {
+    position: absolute;
+    bottom: 14px; left: 14px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 10px 14px;
+    display: flex; gap: 14px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 50%; }
+  .legend-dot.ev { background: var(--green); }
+  .legend-dot.power { background: var(--amber); }
+  .legend-dot.scooter { background: var(--purple); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex; align-items: flex-end; justify-content: center;
+    z-index: 200;
+    padding: 0;
+  }
+
+  .modal {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 20px 20px 0 0;
+    padding: 24px;
+    width: 100%;
+    max-width: 500px;
+    animation: slideUp 0.3s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  @keyframes slideUp {
+    from { transform: translateY(100%); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .modal-handle {
+    width: 40px; height: 4px;
+    background: var(--border2);
+    border-radius: 2px;
+    margin: 0 auto 20px;
+  }
+
+  .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .modal-title { font-size: 18px; font-weight: 700; }
+  .modal-close { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--text2); font-size: 18px; }
+
+  .detail-banner {
+    height: 120px;
+    background: linear-gradient(135deg, #0d2030, #1a2d1a);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    position: relative; overflow: hidden;
+    border: 1px solid var(--border);
+  }
+  .detail-banner i { font-size: 48px; opacity: 0.3; }
+  .detail-banner-badge {
+    position: absolute; top: 10px; right: 10px;
+    font-size: 12px; font-weight: 600;
+    padding: 4px 10px; border-radius: 20px;
+  }
+
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .detail-box {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+  }
+  .detail-box-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; }
+  .detail-box-val { font-size: 16px; font-weight: 700; }
+  .detail-box-val.green { color: var(--green); }
+  .detail-box-val.amber { color: var(--amber); }
+
+  .ports-section { margin-bottom: 16px; }
+  .port-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .port-item:last-child { border-bottom: none; }
+  .port-left { display: flex; align-items: center; gap: 10px; }
+  .port-tag {
+    font-size: 11px; font-weight: 700;
+    padding: 3px 8px; border-radius: 6px;
+    background: rgba(0,214,143,0.1); color: var(--green);
+  }
+  .port-name { font-size: 14px; }
+  .port-right { display: flex; align-items: center; gap: 8px; }
+  .port-status { font-size: 12px; color: var(--text2); }
+  .port-avail { font-size: 12px; font-weight: 600; }
+
+  /* DATE/TIME PICKER */
+  .booking-section { margin-bottom: 16px; }
+  .booking-title { font-size: 14px; font-weight: 600; margin-bottom: 10px; color: var(--text2); }
+
+  .time-slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 12px; }
+  .time-slot {
+    padding: 8px 4px;
+    text-align: center;
+    font-size: 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text2);
+  }
+  .time-slot:hover { border-color: var(--green); color: var(--green); }
+  .time-slot.selected { background: rgba(0,214,143,0.12); border-color: var(--green); color: var(--green); font-weight: 700; }
+  .time-slot.disabled { opacity: 0.35; cursor: not-allowed; }
+
+  .duration-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .duration-label { font-size: 13px; color: var(--text2); flex: 1; }
+  .duration-btns { display: flex; gap: 4px; }
+  .dur-btn {
+    padding: 5px 10px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 12px; color: var(--text2);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .dur-btn.selected { background: rgba(0,214,143,0.12); border-color: var(--green); color: var(--green); font-weight: 600; }
+
+  .price-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 14px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 14px;
+  }
+  .price-label { font-size: 13px; color: var(--text2); }
+  .price-val { font-size: 20px; font-weight: 700; color: var(--green); }
+
+  /* PROFILE */
+  .profile-modal {
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 24px;
+    width: 100%;
+    max-width: 440px;
+    margin: 20px;
+    animation: fadeIn 0.2s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  @keyframes fadeIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+
+  .profile-avatar {
+    width: 68px; height: 68px;
+    background: linear-gradient(135deg, var(--green), var(--blue));
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px; font-weight: 700; color: #0a1628;
+    margin: 0 auto 16px;
+  }
+
+  .profile-name { text-align: center; font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .profile-phone { text-align: center; font-size: 14px; color: var(--text2); margin-bottom: 24px; }
+
+  .profile-form { display: flex; flex-direction: column; gap: 12px; }
+  .pf-label { font-size: 12px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px; }
+  .pf-input {
+    width: 100%;
+    background: var(--bg3);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 14px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .pf-input:focus { border-color: var(--green); }
+
+  .car-types { display: flex; flex-wrap: wrap; gap: 6px; }
+  .car-type-chip {
+    padding: 6px 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 12px; color: var(--text2);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .car-type-chip.selected { background: rgba(0,214,143,0.1); border-color: var(--green); color: var(--green); }
+
+  .save-banner {
+    background: rgba(0,214,143,0.1);
+    border: 1px solid var(--green);
+    border-radius: 10px;
+    padding: 12px;
+    font-size: 13px;
+    color: var(--green);
+    text-align: center;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+
+  .hidden { display: none !important; }
+
+  .user-loc-pulse {
+    position: absolute;
+    width: 20px; height: 20px;
+    transform: translate(-50%, -50%);
+  }
+  .pulse-dot {
+    width: 12px; height: 12px;
+    background: var(--blue);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid white;
+  }
+  .pulse-ring {
+    width: 28px; height: 28px;
+    border: 2px solid var(--blue);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulse 2s infinite;
+    opacity: 0.5;
+  }
+  @keyframes pulse {
+    0% { transform: translate(-50%,-50%) scale(0.8); opacity: 0.8; }
+    100% { transform: translate(-50%,-50%) scale(2); opacity: 0; }
+  }
+
+  .notification-badge {
+    position: absolute;
+    top: -4px; right: -4px;
+    width: 16px; height: 16px;
+    background: var(--red);
+    border-radius: 50%;
+    font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    border: 2px solid var(--bg2);
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: var(--card);
+    border: 1px solid var(--green);
+    border-radius: 10px;
+    padding: 12px 20px;
+    font-size: 14px; font-weight: 500;
+    display: flex; align-items: center; gap: 8px;
+    color: var(--green);
+    z-index: 300;
+    transition: transform 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .dir-bar {
+    position: absolute;
+    bottom: 14px; right: 14px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex; gap: 16px;
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .dir-bar.show { opacity: 1; }
+  .dir-stat { text-align: center; }
+  .dir-stat-val { font-size: 18px; font-weight: 700; }
+  .dir-stat-val.green { color: var(--green); }
+  .dir-stat-label { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  .modal-overlay.center { align-items: center; justify-content: center; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .main-content { flex-direction: column; }
+    .sidebar {
+      width: 100%;
+      height: 46vh;
+      flex-shrink: 0;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .map-area {
+      width: 100%;
+      flex: 1;
+      min-height: 220px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .map-legend { gap: 8px; padding: 8px 10px; }
+    .legend-item { font-size: 11px; }
+    .dir-bar { padding: 10px 12px; gap: 10px; }
+  }
+
+  /* ===== BOOKING FLOW (full screen modal) ===== */
+  .booking-flow-overlay {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    z-index: 500;
+    overflow-y: auto;
+  }
+  .bf-wrap { max-width: 480px; margin: 0 auto; padding: 20px 16px 40px; }
+
+  .bf-topbar { display:flex; align-items:center; gap:10px; margin-bottom:22px; }
+  .bf-back { width:36px;height:36px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:18px;flex-shrink:0; }
+  .bf-back:hover { color:var(--text); }
+  .bf-title { font-size:16px; font-weight:700; }
+  .bf-title span { color:var(--text3); font-weight:400; font-size:13px; }
+
+  .step-bar { display:flex; align-items:center; gap:0; margin-bottom:26px; }
+  .step-col { display:flex; flex-direction:column; align-items:center; }
+  .step-circle {
+    width:30px;height:30px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:700;flex-shrink:0;
+    border:2px solid var(--border2);
+    color:var(--text3);background:var(--bg3);
+    transition:all 0.3s;
+  }
+  .step-circle.done { background:var(--green); border-color:var(--green); color:#0a1628; }
+  .step-circle.active { background:var(--bg3); border-color:var(--green); color:var(--green); }
+  .step-line { height:2px; flex:1; background:var(--border2); transition:background 0.3s; }
+  .step-line.done { background:var(--green); }
+  .step-label { font-size:9px; color:var(--text3); text-align:center; margin-top:4px; white-space:nowrap; }
+
+  .bf-screen { display:none; }
+  .bf-screen.active { display:block; animation: fadeIn 0.25s ease; }
+
+  .bf-card { background:var(--card); border:1px solid var(--border2); border-radius:16px; padding:18px; margin-bottom:14px; }
+  .bf-card-title { font-size:15px; font-weight:700; margin-bottom:12px; }
+
+  .bf-section-label { font-size:11px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:0.7px; margin-bottom:9px; }
+
+  .bf-time-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:14px; }
+  .bf-tslot {
+    padding:9px 4px; text-align:center; font-size:12px;
+    background:var(--bg3); border:1px solid var(--border2);
+    border-radius:8px; cursor:pointer; color:var(--text2);
+    transition:all 0.15s;
+  }
+  .bf-tslot:hover:not(.busy) { border-color:var(--green); color:var(--green); }
+  .bf-tslot.sel { background:rgba(0,214,143,0.12); border-color:var(--green); color:var(--green); font-weight:700; }
+  .bf-tslot.busy { opacity:0.3; cursor:not-allowed; }
+
+  .bf-dur-row { display:flex; gap:6px; margin-bottom:16px; }
+  .bf-dur { flex:1; padding:9px 4px; text-align:center; font-size:12px; background:var(--bg3); border:1px solid var(--border2); border-radius:8px; cursor:pointer; color:var(--text2); transition:all 0.15s; }
+  .bf-dur:hover { border-color:var(--green); color:var(--green); }
+  .bf-dur.sel { background:rgba(0,214,143,0.12); border-color:var(--green); color:var(--green); font-weight:700; }
+
+  .bf-price-summary { background:var(--bg3); border:1px solid var(--border2); border-radius:12px; padding:16px; margin-bottom:6px; }
+  .bf-ps-row { display:flex; justify-content:space-between; font-size:13px; padding:4px 0; }
+  .bf-ps-row.total { border-top:1px solid var(--border2); margin-top:8px; padding-top:10px; font-weight:700; font-size:15px; }
+  .bf-ps-row.highlight { color:var(--green); }
+
+  .bf-terms-box { background:var(--bg3); border:1px solid var(--border2); border-radius:12px; padding:14px; margin-bottom:14px; max-height:160px; overflow-y:auto; }
+  .bf-terms-box::-webkit-scrollbar { width:3px; }
+  .bf-terms-box::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+  .bf-terms-text { font-size:12px; color:var(--text2); line-height:1.7; }
+  .bf-terms-text p { margin-bottom:8px; }
+  .bf-terms-text strong { color:var(--text); font-weight:600; }
+
+  .bf-agree-row { display:flex; align-items:flex-start; gap:10px; padding:12px; background:var(--bg3); border:1px solid var(--border2); border-radius:10px; cursor:pointer; margin-bottom:14px; transition:border-color 0.2s; }
+  .bf-agree-row.checked { border-color:var(--green); }
+  .bf-checkbox { width:20px;height:20px;border-radius:5px;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all 0.15s; }
+  .bf-checkbox.checked { background:var(--green); border-color:var(--green); }
+  .bf-checkbox i { font-size:13px; color:#0a1628; }
+  .bf-agree-text { font-size:13px; color:var(--text2); line-height:1.5; }
+  .bf-agree-text strong { color:var(--text); }
+
+  .bf-warning-banner { display:flex; align-items:flex-start; gap:8px; padding:10px 12px; background:rgba(245,158,11,0.08); border:1px solid rgba(245,158,11,0.2); border-radius:8px; font-size:12px; color:var(--amber); margin-bottom:14px; line-height:1.5; }
+
+  .bf-payment-method { display:flex; align-items:center; gap:12px; padding:14px; background:var(--bg3); border:2px solid var(--border); border-radius:12px; cursor:pointer; margin-bottom:8px; transition:all 0.15s; }
+  .bf-payment-method.sel { border-color:var(--green); background:rgba(0,214,143,0.04); }
+  .bf-pm-logo { width:44px;height:30px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;letter-spacing:-0.5px; }
+  .bf-pm-logo.payme { background:#007aff; color:white; }
+  .bf-pm-logo.uzum { background:#9b59b6; color:white; }
+  .bf-pm-logo.card { background:var(--bg2); color:var(--text2); border:1px solid var(--border2); font-size:18px; }
+  .bf-pm-info { flex:1; }
+  .bf-pm-name { font-size:14px; font-weight:600; }
+  .bf-pm-sub { font-size:12px; color:var(--text3); }
+  .bf-pm-radio { width:18px;height:18px;border-radius:50%;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all 0.15s; }
+  .bf-pm-radio.sel { border-color:var(--green); }
+  .bf-pm-radio-dot { width:8px;height:8px;border-radius:50%;background:var(--green);opacity:0; }
+  .bf-pm-radio.sel .bf-pm-radio-dot { opacity:1; }
+
+  .bf-redirect-info { display:flex; align-items:center; gap:8px; padding:10px 12px; background:rgba(0,214,143,0.06); border:1px solid rgba(0,214,143,0.2); border-radius:8px; font-size:12px; color:var(--green); margin-top:10px; }
+
+  .bf-station-header { display:flex; align-items:center; gap:12px; padding:12px; background:var(--bg3); border:1px solid var(--border2); border-radius:10px; margin-bottom:16px; }
+  .bf-station-icon { width:40px;height:40px;border-radius:10px;background:rgba(0,214,143,0.12);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:20px; }
+  .bf-station-name { font-size:14px; font-weight:700; }
+  .bf-station-addr { font-size:12px; color:var(--text2); }
+
+  .bf-success-icon { width:72px;height:72px;border-radius:50%;background:rgba(0,214,143,0.12);border:2px solid var(--green);display:flex;align-items:center;justify-content:center;font-size:36px;color:var(--green);margin:0 auto 16px; }
+  .bf-success-title { text-align:center; font-size:20px; font-weight:800; margin-bottom:6px; }
+  .bf-success-sub { text-align:center; font-size:13px; color:var(--text2); margin-bottom:24px; }
+
+  .bf-receipt-row { display:flex; justify-content:space-between; font-size:13px; padding:9px 0; border-bottom:1px solid var(--border); }
+  .bf-receipt-row:last-child { border-bottom:none; }
+  .bf-receipt-row .label { color:var(--text2); }
+  .bf-receipt-row .val { font-weight:600; }
+  .bf-receipt-row .val.green { color:var(--green); }
+
+  .bf-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:20px; font-size:11px; font-weight:700; }
+  .bf-badge-green { background:rgba(0,214,143,0.12); color:var(--green); }
+
+  .bf-btn { width:100%; padding:14px; border-radius:12px; font-size:15px; font-weight:700; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; transition:opacity 0.2s, transform 0.1s; }
+  .bf-btn:active { transform:scale(0.99); }
+  .bf-btn-green { background:var(--green); color:#0a1628; }
+  .bf-btn-green:hover { opacity:0.9; }
+  .bf-btn-green:disabled { opacity:0.4; cursor:not-allowed; }
+  .bf-btn-outline { background:var(--bg3); color:var(--text2); border:1px solid var(--border2); margin-top:8px; }
+  .bf-btn-outline:hover { color:var(--text); }
+
+  /* ===== ADMIN PANEL ===== */
+  .admin-trigger {
+    margin-top: 14px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text3);
+    cursor: pointer;
+    user-select: none;
+    letter-spacing: 0.4px;
+    transition: color 0.2s;
+  }
+  .admin-trigger:hover { color: var(--text2); }
+
+  .admin-overlay { position: fixed; inset:0; background: var(--bg); z-index: 600; overflow-y:auto; }
+
+  /* These two modals are opened from inside the admin panel (z-index:600), so they need to
+     sit above it, not at the base .modal-overlay z-index:200 */
+  #stationFormOverlay, #confirmOverlay { z-index: 700; }
+
+  .admin-login-wrap { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px; }
+  .admin-login-card { background:var(--card); border:1px solid var(--border2); border-radius:20px; padding:36px; width:100%; max-width:380px; }
+  .admin-login-icon { width:52px;height:52px;background:linear-gradient(135deg,var(--purple),var(--blue));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;color:white;margin:0 auto 18px; }
+  .admin-login-title { text-align:center; font-size:19px; font-weight:700; margin-bottom:4px; }
+  .admin-login-sub { text-align:center; font-size:13px; color:var(--text2); margin-bottom:26px; }
+  .admin-field { margin-bottom:14px; }
+  .admin-field-label { font-size:12px; color:var(--text2); margin-bottom:7px; font-weight:500; }
+  .admin-field-input { width:100%; background:var(--bg3); border:1px solid var(--border2); border-radius:10px; padding:12px 14px; font-size:14px; color:var(--text); outline:none; transition:border-color 0.2s; }
+  .admin-field-input:focus { border-color: var(--purple); }
+  .admin-login-err { font-size:12px; color:var(--red); margin-top:10px; text-align:center; display:none; }
+  .admin-login-err.show { display:block; }
+  .admin-back-link { text-align:center; margin-top:18px; font-size:12px; color:var(--text3); cursor:pointer; }
+  .admin-back-link:hover { color:var(--text2); }
+
+  /* Admin dashboard layout */
+  .admin-app { display:none; flex-direction:column; height:100vh; }
+  .admin-app.active { display:flex; }
+  .admin-topbar { background:var(--bg2); border-bottom:1px solid var(--border); padding:0 20px; height:58px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0; }
+  .admin-logo-row { display:flex; align-items:center; gap:10px; }
+  .admin-logo-icon { width:32px;height:32px;background:linear-gradient(135deg,var(--purple),var(--blue));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;color:white; }
+  .admin-logo-text { font-size:16px; font-weight:700; }
+  .admin-logo-text span { color: var(--purple); }
+  .admin-topbar-right { display:flex; align-items:center; gap:10px; }
+  .admin-pill { font-size:11px; padding:4px 10px; border-radius:20px; background:rgba(139,92,246,0.12); color:var(--purple); font-weight:600; }
+  .admin-logout-btn { width:36px;height:36px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:17px; }
+  .admin-logout-btn:hover { background:var(--border); color:var(--red); }
+
+  .admin-body { flex:1; display:flex; overflow:hidden; }
+  .admin-nav { width:200px; background:var(--bg2); border-right:1px solid var(--border); padding:14px 10px; flex-shrink:0; }
+  .admin-nav-item { display:flex; align-items:center; gap:10px; padding:10px 12px; border-radius:10px; font-size:13px; color:var(--text2); cursor:pointer; margin-bottom:2px; transition:all 0.15s; font-weight:500; }
+  .admin-nav-item i { font-size:17px; width:18px; text-align:center; }
+  .admin-nav-item:hover { background:var(--bg3); color:var(--text); }
+  .admin-nav-item.active { background:rgba(139,92,246,0.1); color:var(--purple); }
+
+  .admin-main { flex:1; overflow-y:auto; padding:24px 28px; }
+  .admin-main::-webkit-scrollbar { width:6px; }
+  .admin-main::-webkit-scrollbar-thumb { background:var(--border2); border-radius:3px; }
+
+  .admin-view { display:none; }
+  .admin-view.active { display:block; animation: fadeIn 0.25s ease; }
+
+  .admin-page-title { font-size:21px; font-weight:700; margin-bottom:4px; }
+  .admin-page-sub { font-size:13px; color:var(--text2); margin-bottom:22px; }
+
+  .admin-stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:24px; }
+  .admin-stat-card { background:var(--card); border:1px solid var(--border2); border-radius:14px; padding:18px; }
+  .admin-stat-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+  .admin-stat-icon { width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px; }
+  .admin-stat-icon.green { background:rgba(0,214,143,0.12); color:var(--green); }
+  .admin-stat-icon.blue { background:rgba(59,130,246,0.12); color:var(--blue); }
+  .admin-stat-icon.amber { background:rgba(245,158,11,0.12); color:var(--amber); }
+  .admin-stat-icon.purple { background:rgba(139,92,246,0.12); color:var(--purple); }
+  .admin-stat-delta { font-size:11px; font-weight:700; padding:3px 7px; border-radius:6px; }
+  .admin-stat-delta.up { background:rgba(0,214,143,0.1); color:var(--green); }
+  .admin-stat-delta.down { background:rgba(239,68,68,0.1); color:var(--red); }
+  .admin-stat-val { font-size:25px; font-weight:800; margin-bottom:3px; }
+  .admin-stat-label { font-size:12px; color:var(--text3); }
+
+  .admin-grid-2 { display:grid; grid-template-columns: 1.4fr 1fr; gap:16px; margin-bottom:20px; align-items:start; }
+  .admin-panel { background:var(--card); border:1px solid var(--border2); border-radius:14px; padding:18px; }
+  .admin-panel-title { font-size:14px; font-weight:700; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between; }
+  .admin-panel-link { font-size:12px; color:var(--text3); font-weight:500; }
+
+  /* mini admin map */
+  .admin-map-box { position:relative; border-radius:12px; overflow:hidden; border:1px solid var(--border); height:280px; background:#0d1521; isolation:isolate; }
+  .admin-map-box svg { width:100%; height:100%; }
+  .admin-map-marker { position:absolute; transform:translate(-50%,-100%); cursor:pointer; }
+  .admin-map-pin { width:26px;height:26px;border-radius:50% 50% 50% 0; transform:rotate(-45deg); display:flex; align-items:center; justify-content:center; border:2px solid rgba(255,255,255,0.25); box-shadow:0 2px 6px rgba(0,0,0,0.4); }
+  .admin-map-pin i { transform:rotate(45deg); font-size:11px; color:#0a1628; }
+  .admin-map-pin.open { background: var(--green); }
+  .admin-map-pin.busy { background: var(--amber); }
+  .admin-map-pin.closed { background: var(--red); }
+  .admin-map-tip { position:absolute; bottom:calc(100% + 5px); left:50%; transform:translateX(-50%); background:var(--bg2); border:1px solid var(--border2); border-radius:6px; padding:4px 8px; font-size:10px; white-space:nowrap; opacity:0; pointer-events:none; transition:opacity .15s; }
+  .admin-map-marker:hover .admin-map-tip { opacity:1; }
+  .admin-map-legend { position:absolute; bottom:10px; left:10px; background:var(--bg2); border:1px solid var(--border2); border-radius:8px; padding:7px 10px; display:flex; gap:10px; font-size:10px; color:var(--text2); }
+  .admin-map-legend span { display:inline-flex; align-items:center; gap:4px; }
+  .admin-map-legend i { width:7px;height:7px;border-radius:50%;display:inline-block; }
+
+  /* bars chart */
+  .admin-bars { display:flex; align-items:flex-end; gap:8px; height:160px; padding-top:10px; }
+  .admin-bar-col { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; gap:6px; }
+  .admin-bar { width:100%; background:linear-gradient(180deg, var(--green), var(--green2)); border-radius:5px 5px 2px 2px; transition: height 0.6s ease; }
+  .admin-bar-label { font-size:10px; color:var(--text3); }
+
+  /* station table */
+  .admin-table { width:100%; border-collapse:collapse; }
+  .admin-table th { text-align:left; font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:0.5px; font-weight:600; padding:0 10px 10px; border-bottom:1px solid var(--border); }
+  .admin-table td { padding:11px 10px; font-size:13px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  .admin-table tr:last-child td { border-bottom:none; }
+  .admin-table tr:hover td { background: var(--bg3); }
+  .admin-row-name { font-weight:600; }
+  .admin-row-sub { font-size:11px; color:var(--text3); margin-top:1px; }
+  .admin-occ-bar-bg { width:70px; height:6px; background:var(--bg3); border-radius:3px; overflow:hidden; display:inline-block; vertical-align:middle; margin-right:8px; }
+  .admin-occ-bar-fill { height:100%; border-radius:3px; }
+  .admin-mini-status { font-size:11px; font-weight:600; padding:3px 8px; border-radius:20px; white-space:nowrap; }
+  .admin-mini-status.open { background:rgba(0,214,143,0.12); color:var(--green); }
+  .admin-mini-status.busy { background:rgba(245,158,11,0.12); color:var(--amber); }
+  .admin-mini-status.closed { background:rgba(239,68,68,0.1); color:var(--red); }
+
+  .admin-list-row { display:flex; align-items:center; justify-content:space-between; padding:11px 0; border-bottom:1px solid var(--border); }
+  .admin-list-row:last-child { border-bottom:none; }
+  .admin-list-left { display:flex; align-items:center; gap:10px; }
+  .admin-list-icon { width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0; }
+  .admin-list-name { font-size:13px; font-weight:600; }
+  .admin-list-sub { font-size:11px; color:var(--text3); }
+  .admin-list-val { font-size:13px; font-weight:700; }
+
+  @media (max-width: 1100px) {
+    .admin-stat-grid { grid-template-columns: repeat(2,1fr); }
+    .admin-grid-2 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 720px) {
+    .admin-nav { width:64px; }
+    .admin-nav-item span.nav-label { display:none; }
+    .admin-nav-item { justify-content:center; }
+  }
+
+  /* admin page header with action button */
+  .admin-page-title-row { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:22px; gap:12px; flex-wrap:wrap; }
+  .admin-page-title-row .admin-page-title { margin-bottom:4px; }
+  .admin-page-title-row .admin-page-sub { margin-bottom:0; }
+
+  .admin-btn-primary {
+    display:flex; align-items:center; gap:7px;
+    background: var(--purple); color:white;
+    border:none; border-radius:10px; padding:10px 16px;
+    font-size:13px; font-weight:700; cursor:pointer;
+    transition: opacity 0.2s; flex-shrink:0;
+  }
+  .admin-btn-primary:hover { opacity:0.88; }
+  .admin-btn-primary i { font-size:16px; }
+
+  .admin-table-thumb { width:42px;height:42px;border-radius:8px;object-fit:cover;background:var(--bg3);display:block; }
+  .admin-table-thumb-placeholder { width:42px;height:42px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:17px; }
+
+  .admin-action-btn {
+    width:30px;height:30px;border-radius:7px;
+    background:var(--bg3); border:1px solid var(--border);
+    display:inline-flex; align-items:center; justify-content:center;
+    cursor:pointer; color:var(--text2); font-size:14px;
+    transition: all 0.15s; margin-right:5px;
+  }
+  .admin-action-btn:hover { color:var(--text); border-color:var(--border2); }
+  .admin-action-btn.danger:hover { color:var(--red); border-color:var(--red); }
+  .admin-action-btn.warn:hover { color:var(--amber); border-color:var(--amber); }
+
+  /* image upload box in station form */
+  .sf-image-upload {
+    width:100%; height:140px; border-radius:12px;
+    background:var(--bg3); border:2px dashed var(--border2);
+    cursor:pointer; overflow:hidden; position:relative;
+    display:flex; align-items:center; justify-content:center;
+    transition: border-color 0.2s;
+  }
+  .sf-image-upload:hover { border-color: var(--purple); }
+  .sf-image-upload img { width:100%; height:100%; object-fit:cover; }
+  .sf-image-placeholder { display:flex; flex-direction:column; align-items:center; gap:6px; color:var(--text3); font-size:12px; }
+  .sf-image-placeholder i { font-size:26px; }
+
+  .sf-contract-box {
+    display:flex; align-items:flex-start; gap:10px;
+    padding:12px; background:var(--bg3); border:1px solid var(--border2);
+    border-radius:10px; cursor:pointer; transition:border-color 0.2s;
+  }
+  .sf-contract-box.checked { border-color: var(--purple); }
+  .sf-contract-box .checkbox.checked { background:var(--purple); border-color:var(--purple); }
+
+  .admin-status-toggle { display:flex; gap:6px; }
+  .admin-status-toggle .car-type-chip { font-size:11px; padding:4px 9px; }
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="authScreen" class="auth-screen">
+  <div class="auth-card">
+    <div class="logo-row">
+      <div class="logo-icon"><i class="ti ti-bolt" aria-hidden="true"></i></div>
+      <div class="logo-text">Zaryd<span>Uz</span></div>
+    </div>
+
+    <div class="step-indicator">
+      <div id="step1dot" class="step-dot" style="width:24px; background:var(--green);"></div>
+      <div id="step2dot" class="step-dot" style="flex:1; background:var(--border2);"></div>
+      <div id="step3dot" class="step-dot" style="flex:1; background:var(--border2);"></div>
+    </div>
+
+    <!-- Step 1: Phone -->
+    <div id="stepPhone">
+      <div class="auth-title">Kirish</div>
+      <div class="auth-sub">Telefon raqamingizni kiriting</div>
+      <div class="field-row">
+        <div class="field-label">Telefon raqam</div>
+        <div class="phone-row">
+          <div class="country-code"><span>🇺🇿</span> +998</div>
+          <input class="field-input" id="phoneInput" type="tel" placeholder="90 123 45 67" maxlength="12" style="flex:1;">
+        </div>
+        <div class="sms-hint">SMS kod yuboriladi</div>
+      </div>
+      <button class="btn-primary" onclick="sendSms()">SMS kod yuborish</button>
+    </div>
+
+    <!-- Step 2: OTP -->
+    <div id="stepOtp" class="hidden">
+      <div class="auth-title">SMS kodni kiriting</div>
+      <div class="auth-sub" id="otpSub">+998 90 *** ** ** ga yuborildi</div>
+      <div class="otp-row">
+        <input class="otp-input" type="tel" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="1" id="otp1" oninput="otpNext(this,1)" onpaste="otpPaste(event,1)" onkeydown="otpKeydown(event,1)">
+        <input class="otp-input" type="tel" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="1" id="otp2" oninput="otpNext(this,2)" onpaste="otpPaste(event,2)" onkeydown="otpKeydown(event,2)">
+        <input class="otp-input" type="tel" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="1" id="otp3" oninput="otpNext(this,3)" onpaste="otpPaste(event,3)" onkeydown="otpKeydown(event,3)">
+        <input class="otp-input" type="tel" inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" maxlength="1" id="otp4" oninput="otpNext(this,4)" onpaste="otpPaste(event,4)" onkeydown="otpKeydown(event,4)">
+      </div>
+      <button class="btn-primary" onclick="verifyOtp()">Tasdiqlash</button>
+      <div class="resend-row">Kodni olmadingizmi? <button class="resend-btn" onclick="resendCode()">Qayta yuborish</button></div>
+    </div>
+
+    <!-- Step 3: Profile -->
+    <div id="stepProfile" class="hidden">
+      <div class="auth-title">Profilni to'ldiring</div>
+      <div class="auth-sub">Bir marta to'ldirasiz, keyin tez ishlaydi</div>
+      <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;">
+        <div>
+          <div class="field-label">Ism va familiya</div>
+          <input class="field-input" placeholder="Masalan: Jasur Karimov" id="nameInput">
+        </div>
+        <div>
+          <div class="field-label">Email (ixtiyoriy)</div>
+          <input class="field-input" placeholder="email@example.com" type="email">
+        </div>
+        <div>
+          <div class="field-label">Avtomobil turi</div>
+          <div class="car-types" id="authCarTypes">
+            <div class="car-type-chip" onclick="toggleCar(this)">Tesla Model 3</div>
+            <div class="car-type-chip" onclick="toggleCar(this)">BYD Atto</div>
+            <div class="car-type-chip" onclick="toggleCar(this)">Chevrolet Bolt</div>
+            <div class="car-type-chip" onclick="toggleCar(this)">Nexon EV</div>
+            <div class="car-type-chip" onclick="toggleCar(this)">Boshqa</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="completeProfile()">Boshlash →</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="mainApp" class="app hidden">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="topbar-logo-icon"><i class="ti ti-bolt" aria-hidden="true"></i></div>
+      <div class="topbar-logo-text">Zaryd<span>Uz</span></div>
+    </div>
+    <div class="topbar-right">
+      <div style="position:relative;" onclick="showToast('2 ta bron sizni kutmoqda')">
+        <div class="icon-btn"><i class="ti ti-bell" aria-hidden="true"></i></div>
+        <div class="notification-badge">2</div>
+      </div>
+      <div class="avatar-btn" id="avatarBtn" onclick="openProfile()">J</div>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sidebar-inner">
+        <div class="search-box">
+          <i class="ti ti-search" aria-hidden="true"></i>
+          <input placeholder="Stansiya qidirish..." id="searchInput" oninput="filterStations()">
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-label">Tur</div>
+          <div class="filter-chips">
+            <div class="chip active" onclick="toggleFilter(this,'all')" data-f="all"><i class="ti ti-category" aria-hidden="true"></i> Hammasi</div>
+            <div class="chip" onclick="toggleFilter(this,'ev')" data-f="ev"><i class="ti ti-bolt" aria-hidden="true"></i> EV</div>
+            <div class="chip" onclick="toggleFilter(this,'power')" data-f="power"><i class="ti ti-device-mobile" aria-hidden="true"></i> Powerbank</div>
+            <div class="chip" onclick="toggleFilter(this,'scooter')" data-f="scooter"><i class="ti ti-motorbike" aria-hidden="true"></i> Skuter</div>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-label">Holat</div>
+          <div class="filter-chips">
+            <div class="chip active" onclick="toggleStatus(this,'all')" data-s="all">Barchasi</div>
+            <div class="chip" onclick="toggleStatus(this,'open')" data-s="open" style="color:var(--green)">Ochiq</div>
+            <div class="chip" onclick="toggleStatus(this,'busy')" data-s="busy" style="color:var(--amber)">Band</div>
+          </div>
+        </div>
+
+        <div class="filter-section">
+          <div class="filter-label">Masofa</div>
+          <div class="filter-chips">
+            <div class="chip active" onclick="toggleDist(this,'any')" data-d="any">Istalgan</div>
+            <div class="chip" onclick="toggleDist(this,'1')" data-d="1">1 km</div>
+            <div class="chip" onclick="toggleDist(this,'3')" data-d="3">3 km</div>
+            <div class="chip" onclick="toggleDist(this,'5')" data-d="5">5 km</div>
+          </div>
+        </div>
+
+        <div class="section-title">
+          Natijalar
+          <span class="section-count" id="stationCount">8 ta</span>
+        </div>
+
+        <div id="stationList"></div>
+      </div>
+    </div>
+
+    <!-- MAP -->
+    <div class="map-area">
+      <div class="map-canvas" id="mapCanvas">
+        <div id="leafletMap" style="width:100%;height:100%;"></div>
+
+        <!-- Map controls -->
+        <div class="map-controls">
+          <div class="map-ctrl-btn" onclick="locateUser()"><i class="ti ti-current-location" aria-hidden="true"></i></div>
+          <div class="map-ctrl-btn" onclick="if(leafletMap)leafletMap.zoomIn()"><i class="ti ti-plus" aria-hidden="true"></i></div>
+          <div class="map-ctrl-btn" onclick="if(leafletMap)leafletMap.zoomOut()"><i class="ti ti-minus" aria-hidden="true"></i></div>
+        </div>
+
+        <!-- Direction bar -->
+        <div class="dir-bar" id="dirBar">
+          <div class="dir-stat"><div class="dir-stat-val green" id="dirDist">—</div><div class="dir-stat-label">km uzoqlik</div></div>
+          <div class="dir-stat"><div class="dir-stat-val" id="dirTime">—</div><div class="dir-stat-label">daqiqa</div></div>
+          <button class="btn-sm blue" style="align-self:center;" onclick="startNav()"><i class="ti ti-navigation" aria-hidden="true"></i> Yo'l</button>
+        </div>
+
+        <!-- Legend -->
+        <div class="map-legend">
+          <div class="legend-item"><div class="legend-dot ev"></div> EV zaryadlash</div>
+          <div class="legend-item"><div class="legend-dot power"></div> Powerbank</div>
+          <div class="legend-item"><div class="legend-dot scooter"></div> Skuter</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATION DETAIL MODAL -->
+<div id="stationModal" class="modal-overlay hidden">
+  <div class="modal" id="modalContent">
+    <div class="modal-handle"></div>
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Stansiya</div>
+      <div class="modal-close" onclick="closeModal()"><i class="ti ti-x" aria-hidden="true"></i></div>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div id="profileModal" class="modal-overlay center hidden">
+  <div class="profile-modal">
+    <div style="display:flex; justify-content:flex-end; margin-bottom:4px;">
+      <div class="modal-close" onclick="closeProfile()"><i class="ti ti-x" aria-hidden="true"></i></div>
+    </div>
+    <div class="profile-avatar" id="profileAvatar">J</div>
+    <div class="profile-name" id="profileName">Jasur Karimov</div>
+    <div class="profile-phone" id="profilePhone">+998 90 123 45 67</div>
+    <div class="profile-form">
+      <div>
+        <div class="pf-label">Ism</div>
+        <input class="pf-input" id="pfName" value="Jasur Karimov">
+      </div>
+      <div>
+        <div class="pf-label">Email</div>
+        <input class="pf-input" id="pfEmail" type="email" placeholder="email@example.com">
+      </div>
+      <div>
+        <div class="pf-label">Avtomobil</div>
+        <div class="car-types">
+          <div class="car-type-chip selected" onclick="toggleCar(this)">Tesla Model 3</div>
+          <div class="car-type-chip" onclick="toggleCar(this)">BYD Atto</div>
+          <div class="car-type-chip" onclick="toggleCar(this)">Chevrolet Bolt</div>
+          <div class="car-type-chip" onclick="toggleCar(this)">Boshqa</div>
+        </div>
+      </div>
+      <div>
+        <div class="pf-label">Mening bronlarim</div>
+        <div style="display:flex; flex-direction:column; gap:6px;" id="myBookings">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;">
+            <div>
+              <div style="font-size:13px;font-weight:600;">Yunusobod EV Station</div>
+              <div style="font-size:12px;color:var(--text2);">Bugun 14:00 — 1 soat</div>
+            </div>
+            <div class="status-badge open">Tasdiqlangan</div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;">
+            <div>
+              <div style="font-size:13px;font-weight:600;">Chilonzor Powerbank</div>
+              <div style="font-size:12px;color:var(--text2);">Ertaga 10:00 — 30 daqiqa</div>
+            </div>
+            <div class="status-badge busy">Kutilmoqda</div>
+          </div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="saveProfile()">Saqlash</button>
+      <div id="pfSaveMsg" class="save-banner hidden"><i class="ti ti-check" aria-hidden="true"></i> Ma'lumotlar saqlandi</div>
+      <div class="admin-trigger" onclick="openAdminLogin()">··· tizim boshqaruvi</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BOOKING FLOW (full screen) ===== -->
+<div class="booking-flow-overlay hidden" id="bookingFlow">
+  <div class="bf-wrap">
+    <div class="bf-topbar">
+      <div class="bf-back" onclick="closeBookingFlow()"><i class="ti ti-x" aria-hidden="true"></i></div>
+      <div class="bf-title">ZaryadUz <span>— Bron qilish</span></div>
+    </div>
+
+    <div class="step-bar" id="bfStepBar">
+      <div class="step-col">
+        <div class="step-circle active" id="bfsc1">1</div>
+        <div class="step-label">Joy & vaqt</div>
+      </div>
+      <div class="step-line" id="bfsl1"></div>
+      <div class="step-col">
+        <div class="step-circle" id="bfsc2">2</div>
+        <div class="step-label">Shartlar</div>
+      </div>
+      <div class="step-line" id="bfsl2"></div>
+      <div class="step-col">
+        <div class="step-circle" id="bfsc3">3</div>
+        <div class="step-label">To'lov usuli</div>
+      </div>
+      <div class="step-line" id="bfsl3"></div>
+      <div class="step-col">
+        <div class="step-circle" id="bfsc4">4</div>
+        <div class="step-label">Tasdiqlash</div>
+      </div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div class="bf-screen active" id="bfs1">
+      <div class="bf-card">
+        <div class="bf-station-header">
+          <div class="bf-station-icon" id="bfStationIcon"><i class="ti ti-bolt" aria-hidden="true"></i></div>
+          <div>
+            <div class="bf-station-name" id="bfStationName">—</div>
+            <div class="bf-station-addr"><i class="ti ti-map-pin" style="font-size:12px;" aria-hidden="true"></i> <span id="bfStationAddr">—</span></div>
+          </div>
+        </div>
+
+        <div class="bf-section-label">Vaqt tanlang (bugun)</div>
+        <div class="bf-time-grid" id="bfTimeGrid"></div>
+
+        <div class="bf-section-label">Davomiylik</div>
+        <div class="bf-dur-row">
+          <div class="bf-dur" onclick="bfSelDur(this,0.5)">30 min</div>
+          <div class="bf-dur sel" onclick="bfSelDur(this,1)">1 soat</div>
+          <div class="bf-dur" onclick="bfSelDur(this,2)">2 soat</div>
+          <div class="bf-dur" onclick="bfSelDur(this,3)">3 soat</div>
+        </div>
+
+        <div class="bf-price-summary">
+          <div class="bf-ps-row"><span>Zaryadlash narxi</span><span id="bfPsBase">—</span></div>
+          <div class="bf-ps-row highlight"><span>Bron uchun oldindan to'lov (30%)</span><span id="bfPsPre">—</span></div>
+          <div class="bf-ps-row"><span>Stansiyada to'lanadigan qoldiq</span><span id="bfPsRest">—</span></div>
+          <div class="bf-ps-row total"><span>Jami</span><span id="bfPsTotal">—</span></div>
+        </div>
+      </div>
+      <button class="bf-btn bf-btn-green" onclick="bfGoStep(2)"><i class="ti ti-arrow-right" aria-hidden="true"></i> Davom etish</button>
+    </div>
+
+    <!-- STEP 2 -->
+    <div class="bf-screen" id="bfs2">
+      <div class="bf-card">
+        <div class="bf-card-title">Foydalanish shartlari</div>
+        <div class="bf-terms-box">
+          <div class="bf-terms-text">
+            <p><strong>1. Bron va to'lov tartibi</strong><br>
+            Bron qilish uchun xizmat narxining 30% miqdorida oldindan to'lov amalga oshiriladi. Qolgan 70% stansiyada zaryadlash tugagandan so'ng to'lanadi.</p>
+            <p><strong>2. Bekor qilish siyosati</strong><br>
+            Bronni belgilangan vaqtdan 2 soat oldin bekor qilsangiz, oldindan to'langan summa to'liq qaytariladi. 2 soatdan kamroq qolsa, 50% qaytariladi. Vaqt o'tgach bekor qilishda to'lov qaytarilmaydi.</p>
+            <p><strong>3. Kechikish</strong><br>
+            Bron vaqtidan 15 daqiqa o'tib kelmagan holda bron avtomatik bekor qilinadi. Oldindan to'lov qaytarilmaydi.</p>
+            <p><strong>4. Port foydalanish</strong><br>
+            Foydalanuvchi faqat o'zi bron qilgan portdan foydalanishi shart. Boshqa portlarni egallash taqiqlanadi.</p>
+            <p><strong>5. Mas'uliyat</strong><br>
+            ZaryadUz platforma sifatida xizmat ko'rsatadi. Stansiya jihozlarining texnik xolati uchun platforma javobgar emas.</p>
+          </div>
+        </div>
+        <div class="bf-agree-row" id="bfAgreeRow" onclick="bfToggleAgree()">
+          <div class="bf-checkbox" id="bfCheckbox"><i class="ti ti-check" aria-hidden="true" style="display:none;"></i></div>
+          <div class="bf-agree-text">Men <strong>Foydalanish shartlari</strong> va <strong>Maxfiylik siyosati</strong> bilan tanishdim va roziman</div>
+        </div>
+        <div class="bf-warning-banner">
+          <i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0;margin-top:1px;" aria-hidden="true"></i>
+          <span>Bron tasdiqlangach, stansiya avtomatik band bo'ladi. Keyingi foydalanuvchilar bu vaqtni ko'ra olmaydi.</span>
+        </div>
+      </div>
+      <button class="bf-btn bf-btn-green" id="bfBtnAgree" onclick="bfGoStep(3)" disabled><i class="ti ti-shield-check" aria-hidden="true"></i> Roziman, to'lovga o'tish</button>
+      <button class="bf-btn bf-btn-outline" onclick="bfGoStep(1)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Ortga</button>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="bf-screen" id="bfs3">
+      <div class="bf-card">
+        <div class="bf-card-title">To'lov usulini tanlang</div>
+        <div style="background:rgba(0,214,143,0.06);border:1px solid rgba(0,214,143,0.2);border-radius:10px;padding:12px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;">
+          <span style="font-size:13px;color:var(--text2);">To'lanadigan summa (30%)</span>
+          <span style="font-size:20px;font-weight:800;color:var(--green);" id="bfPayAmount">—</span>
+        </div>
+
+        <div class="bf-payment-method sel" id="bfPmPayme" onclick="bfSelPay('payme')">
+          <div class="bf-pm-logo payme">Pay<br>me</div>
+          <div class="bf-pm-info">
+            <div class="bf-pm-name">Payme</div>
+            <div class="bf-pm-sub">Payme ilovasi orqali to'lov</div>
+          </div>
+          <div class="bf-pm-radio sel" id="bfRPayme"><div class="bf-pm-radio-dot"></div></div>
+        </div>
+
+        <div class="bf-payment-method" id="bfPmUzum" onclick="bfSelPay('uzum')">
+          <div class="bf-pm-logo uzum">Uzum<br>Pay</div>
+          <div class="bf-pm-info">
+            <div class="bf-pm-name">Uzum Pay</div>
+            <div class="bf-pm-sub">Uzum Market ilovasi orqali</div>
+          </div>
+          <div class="bf-pm-radio" id="bfRUzum"><div class="bf-pm-radio-dot"></div></div>
+        </div>
+
+        <div class="bf-payment-method" id="bfPmCard" onclick="bfSelPay('card')">
+          <div class="bf-pm-logo card"><i class="ti ti-credit-card" aria-hidden="true"></i></div>
+          <div class="bf-pm-info">
+            <div class="bf-pm-name">Bank kartasi</div>
+            <div class="bf-pm-sub">Humo / UzCard karta orqali</div>
+          </div>
+          <div class="bf-pm-radio" id="bfRCard"><div class="bf-pm-radio-dot"></div></div>
+        </div>
+
+        <div class="bf-redirect-info">
+          <i class="ti ti-external-link" style="font-size:15px;flex-shrink:0;" aria-hidden="true"></i>
+          <span id="bfRedirectText">Payme ilovasi avtomatik ochiladi va to'lov sahifasiga o'tasiz</span>
+        </div>
+      </div>
+      <button class="bf-btn bf-btn-green" onclick="bfGoStep(4)"><i class="ti ti-lock" aria-hidden="true"></i> To'lovga o'tish</button>
+      <button class="bf-btn bf-btn-outline" onclick="bfGoStep(2)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Ortga</button>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="bf-screen" id="bfs4">
+      <div class="bf-card">
+        <div style="text-align:center;padding:8px 0 16px;">
+          <div class="bf-success-icon"><i class="ti ti-check" aria-hidden="true"></i></div>
+          <div class="bf-success-title">Bron tasdiqlandi!</div>
+          <div class="bf-success-sub">To'lov muvaffaqiyatli o'tdi. SMS yuborildi.</div>
+        </div>
+        <div class="bf-section-label">Bron ma'lumotlari</div>
+        <div class="bf-receipt-row"><span class="label">Stansiya</span><span class="val" id="bfFinalStation">—</span></div>
+        <div class="bf-receipt-row"><span class="label">Manzil</span><span class="val" id="bfFinalAddr">—</span></div>
+        <div class="bf-receipt-row"><span class="label">Sana</span><span class="val">Bugun</span></div>
+        <div class="bf-receipt-row"><span class="label">Vaqt</span><span class="val" id="bfFinalTime">—</span></div>
+        <div class="bf-receipt-row"><span class="label">Davomiylik</span><span class="val" id="bfFinalDur">—</span></div>
+        <div class="bf-receipt-row"><span class="label">Port</span><span class="val" id="bfFinalPort">—</span></div>
+        <div class="bf-receipt-row"><span class="label">To'langan (30%)</span><span class="val green" id="bfFinalPaid">—</span></div>
+        <div class="bf-receipt-row"><span class="label">To'lov usuli</span><span class="val" id="bfFinalPm">—</span></div>
+        <div class="bf-receipt-row"><span class="label">Qolgan summa</span><span class="val" id="bfFinalRest">—</span></div>
+        <div class="bf-receipt-row"><span class="label">Holat</span><span class="val"><span class="bf-badge bf-badge-green"><i class="ti ti-check" style="font-size:11px;" aria-hidden="true"></i> Tasdiqlangan</span></span></div>
+        <div class="bf-receipt-row"><span class="label">Bron kodi</span><span class="val" style="font-family:monospace;color:var(--amber);" id="bfFinalCode">—</span></div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="bf-btn bf-btn-green" style="flex:1;" onclick="bfGoNav()"><i class="ti ti-navigation" aria-hidden="true"></i> Yo'l ko'rsatish</button>
+        <button class="bf-btn bf-btn-outline" style="flex:1;margin-top:0;" onclick="closeBookingFlow()"><i class="ti ti-check" aria-hidden="true"></i> Tayyor</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN LOGIN ===== -->
+<div class="admin-overlay hidden" id="adminLoginOverlay">
+  <div class="admin-login-wrap">
+    <div class="admin-login-card">
+      <div class="admin-login-icon"><i class="ti ti-shield-lock" aria-hidden="true"></i></div>
+      <div class="admin-login-title">Admin panel</div>
+      <div class="admin-login-sub">ZaryadUz tizim boshqaruvi</div>
+      <div class="admin-field">
+        <div class="admin-field-label">Login</div>
+        <input class="admin-field-input" id="adminUser" placeholder="admin" autocomplete="off">
+      </div>
+      <div class="admin-field">
+        <div class="admin-field-label">Parol</div>
+        <input class="admin-field-input" id="adminPass" type="password" placeholder="••••••••" autocomplete="off" onkeydown="if(event.key==='Enter')adminLogin()">
+      </div>
+      <button class="btn-primary" onclick="adminLogin()">Kirish</button>
+      <div class="admin-login-err" id="adminLoginErr"><i class="ti ti-alert-circle" aria-hidden="true"></i> Login yoki parol noto'g'ri</div>
+      <div class="admin-back-link" onclick="closeAdminLogin()">← Foydalanuvchi rejimiga qaytish</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADMIN DASHBOARD ===== -->
+<div class="admin-overlay hidden" id="adminDashboardOverlay">
+  <div class="admin-app active" id="adminApp">
+    <div class="admin-topbar">
+      <div class="admin-logo-row">
+        <div class="admin-logo-icon"><i class="ti ti-bolt" aria-hidden="true"></i></div>
+        <div class="admin-logo-text">Zaryd<span>Uz</span> Admin</div>
+      </div>
+      <div class="admin-topbar-right">
+        <div class="admin-pill"><i class="ti ti-circle-filled" style="font-size:8px;vertical-align:1px;" aria-hidden="true"></i> Jonli</div>
+        <div class="admin-logout-btn" onclick="adminLogout()" title="Chiqish"><i class="ti ti-logout" aria-hidden="true"></i></div>
+      </div>
+    </div>
+    <div class="admin-body">
+      <div class="admin-nav">
+        <div class="admin-nav-item active" data-av="overview" onclick="adminNav(this,'overview')"><i class="ti ti-layout-dashboard" aria-hidden="true"></i><span class="nav-label">Umumiy</span></div>
+        <div class="admin-nav-item" data-av="stations" onclick="adminNav(this,'stations')"><i class="ti ti-map-pin" aria-hidden="true"></i><span class="nav-label">Stansiyalar</span></div>
+        <div class="admin-nav-item" data-av="bookings" onclick="adminNav(this,'bookings')"><i class="ti ti-calendar-event" aria-hidden="true"></i><span class="nav-label">Bronlar</span></div>
+        <div class="admin-nav-item" data-av="revenue" onclick="adminNav(this,'revenue')"><i class="ti ti-chart-bar" aria-hidden="true"></i><span class="nav-label">Daromad</span></div>
+        <div class="admin-nav-item" data-av="users" onclick="adminNav(this,'users')"><i class="ti ti-users" aria-hidden="true"></i><span class="nav-label">Foydalanuvchilar</span></div>
+      </div>
+      <div class="admin-main">
+
+        <!-- OVERVIEW -->
+        <div class="admin-view active" id="av-overview">
+          <div class="admin-page-title">Umumiy ko'rinish</div>
+          <div class="admin-page-sub">Bugungi holat va asosiy ko'rsatkichlar</div>
+
+          <div class="admin-stat-grid">
+            <div class="admin-stat-card">
+              <div class="admin-stat-top"><div class="admin-stat-icon green"><i class="ti ti-bolt" aria-hidden="true"></i></div><div class="admin-stat-delta up">+12%</div></div>
+              <div class="admin-stat-val">8</div>
+              <div class="admin-stat-label">Jami stansiyalar</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-top"><div class="admin-stat-icon blue"><i class="ti ti-calendar-event" aria-hidden="true"></i></div><div class="admin-stat-delta up">+8%</div></div>
+              <div class="admin-stat-val">347</div>
+              <div class="admin-stat-label">Bugungi bronlar</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-top"><div class="admin-stat-icon amber"><i class="ti ti-currency-dollar" aria-hidden="true"></i></div><div class="admin-stat-delta up">+24%</div></div>
+              <div class="admin-stat-val">18.4M</div>
+              <div class="admin-stat-label">Bugungi daromad (so'm)</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-top"><div class="admin-stat-icon purple"><i class="ti ti-users" aria-hidden="true"></i></div><div class="admin-stat-delta down">-3%</div></div>
+              <div class="admin-stat-val">2,156</div>
+              <div class="admin-stat-label">Faol foydalanuvchilar</div>
+            </div>
+          </div>
+
+          <div class="admin-grid-2">
+            <div class="admin-panel">
+              <div class="admin-panel-title">Stansiyalar xaritada <span class="admin-panel-link">Toshkent</span></div>
+              <div class="admin-map-box" id="adminMapBox">
+                <div id="adminLeafletMap" style="width:100%;height:100%;"></div>
+                <div class="admin-map-legend">
+                  <span><i style="background:var(--green);"></i> Ochiq</span>
+                  <span><i style="background:var(--amber);"></i> Band</span>
+                  <span><i style="background:var(--red);"></i> Yopiq</span>
+                </div>
+              </div>
+            </div>
+            <div class="admin-panel">
+              <div class="admin-panel-title">Haftalik bronlar</div>
+              <div class="admin-bars" id="adminBars"></div>
+            </div>
+          </div>
+
+          <div class="admin-panel">
+            <div class="admin-panel-title">So'nggi faollik</div>
+            <div id="adminActivityList"></div>
+          </div>
+        </div>
+
+        <!-- STATIONS -->
+        <div class="admin-view" id="av-stations">
+          <div class="admin-page-title-row">
+            <div>
+              <div class="admin-page-title">Stansiyalar</div>
+              <div class="admin-page-sub">Barcha stansiyalar holati va statistikasi</div>
+            </div>
+            <button class="admin-btn-primary" onclick="openStationForm()"><i class="ti ti-plus" aria-hidden="true"></i> Stansiya qo'shish</button>
+          </div>
+          <div class="admin-panel">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Rasm</th><th>Stansiya</th><th>Turi</th><th>Holat</th><th>Bandlik</th><th>Bugun bron</th><th>Reyting</th><th>Amallar</th></tr>
+              </thead>
+              <tbody id="adminStationTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- BOOKINGS -->
+        <div class="admin-view" id="av-bookings">
+          <div class="admin-page-title">Bronlar</div>
+          <div class="admin-page-sub">So'nggi bron qilingan vaqtlar</div>
+          <div class="admin-panel">
+            <table class="admin-table">
+              <thead>
+                <tr><th>Bron kodi</th><th>Foydalanuvchi</th><th>Stansiya</th><th>Vaqt</th><th>Summa</th><th>Holat</th></tr>
+              </thead>
+              <tbody id="adminBookingTable"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- REVENUE -->
+        <div class="admin-view" id="av-revenue">
+          <div class="admin-page-title">Daromad</div>
+          <div class="admin-page-sub">To'lov usullari va stansiyalar bo'yicha taqsimot</div>
+          <div class="admin-grid-2">
+            <div class="admin-panel">
+              <div class="admin-panel-title">Stansiya bo'yicha daromad</div>
+              <div id="adminRevByStation"></div>
+            </div>
+            <div class="admin-panel">
+              <div class="admin-panel-title">To'lov usullari</div>
+              <div id="adminRevByMethod"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- USERS -->
+        <div class="admin-view" id="av-users">
+          <div class="admin-page-title">Foydalanuvchilar</div>
+          <div class="admin-page-sub">Ro'yxatdan o'tgan foydalanuvchilar statistikasi</div>
+          <div class="admin-stat-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
+            <div class="admin-stat-card">
+              <div class="admin-stat-top"><div class="admin-stat-icon purple"><i class="ti ti-user-plus" aria-hidden="true"></i></div></div>
+              <div class="admin-stat-val">2,156</div>
+              <div class="admin-stat-label">Jami foydalanuvchilar</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-top"><div class="admin-stat-icon green"><i class="ti ti-bolt" aria-hidden="true"></i></div></div>
+              <div class="admin-stat-val">1,340</div>
+              <div class="admin-stat-label">EV egalari</div>
+            </div>
+            <div class="admin-stat-card">
+              <div class="admin-stat-top"><div class="admin-stat-icon blue"><i class="ti ti-repeat" aria-hidden="true"></i></div></div>
+              <div class="admin-stat-val">68%</div>
+              <div class="admin-stat-label">Qayta foydalanish darajasi</div>
+            </div>
+          </div>
+          <div class="admin-panel" style="margin-bottom:20px;">
+            <div class="admin-panel-title">Foydalanuvchilar ro'yxati</div>
+            <table class="admin-table">
+              <thead>
+                <tr><th>Foydalanuvchi</th><th>Telefon</th><th>Bronlar</th><th>Ro'yxatdan o'tgan</th><th>Holat</th><th>Amallar</th></tr>
+              </thead>
+              <tbody id="adminUserTable"></tbody>
+            </table>
+          </div>
+          <div class="admin-panel">
+            <div class="admin-panel-title">Avtomobil turlari bo'yicha</div>
+            <div id="adminCarTypes"></div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATION FORM MODAL (add / edit) -->
+<div class="modal-overlay center hidden" id="stationFormOverlay">
+  <div class="profile-modal" style="max-width:480px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+      <div style="font-size:18px;font-weight:700;" id="stationFormTitle">Stansiya qo'shish</div>
+      <div class="modal-close" onclick="closeStationForm()"><i class="ti ti-x" aria-hidden="true"></i></div>
+    </div>
+    <div class="profile-form">
+      <input type="hidden" id="sfId">
+
+      <div>
+        <div class="pf-label">Rasm</div>
+        <div class="sf-image-upload" id="sfImageUpload" onclick="document.getElementById('sfImageInput').click()">
+          <img id="sfImagePreview" class="hidden">
+          <div id="sfImagePlaceholder" class="sf-image-placeholder">
+            <i class="ti ti-photo-plus" aria-hidden="true"></i>
+            <span>Rasm yuklash uchun bosing</span>
+          </div>
+        </div>
+        <input type="file" id="sfImageInput" accept="image/*" class="hidden" onchange="sfHandleImage(event)">
+      </div>
+
+      <div>
+        <div class="pf-label">Stansiya nomi</div>
+        <input class="pf-input" id="sfName" placeholder="Masalan: Yakkasaroy EV Hub">
+      </div>
+      <div>
+        <div class="pf-label">Manzil</div>
+        <input class="pf-input" id="sfAddr" placeholder="Ko'cha, uy raqami">
+      </div>
+      <div style="display:flex;gap:10px;">
+        <div style="flex:1;">
+          <div class="pf-label">Kenglik (lat)</div>
+          <input class="pf-input" id="sfLat" placeholder="41.3111" type="number" step="0.0001">
+        </div>
+        <div style="flex:1;">
+          <div class="pf-label">Uzunlik (lng)</div>
+          <input class="pf-input" id="sfLng" placeholder="69.2797" type="number" step="0.0001">
+        </div>
+      </div>
+      <div>
+        <div class="pf-label">Turi</div>
+        <div class="car-types" id="sfTypeChips">
+          <div class="car-type-chip selected" data-v="ev" onclick="sfSelectChip(this,'sfTypeChips')">EV Zaryadlash</div>
+          <div class="car-type-chip" data-v="power" onclick="sfSelectChip(this,'sfTypeChips')">Powerbank</div>
+          <div class="car-type-chip" data-v="scooter" onclick="sfSelectChip(this,'sfTypeChips')">Skuter</div>
+        </div>
+      </div>
+      <div>
+        <div class="pf-label">Holat</div>
+        <div class="car-types" id="sfStatusChips">
+          <div class="car-type-chip selected" data-v="open" onclick="sfSelectChip(this,'sfStatusChips')">Ochiq</div>
+          <div class="car-type-chip" data-v="busy" onclick="sfSelectChip(this,'sfStatusChips')">Band</div>
+          <div class="car-type-chip" data-v="closed" onclick="sfSelectChip(this,'sfStatusChips')">Yopiq</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;">
+        <div style="flex:1;">
+          <div class="pf-label">Quvvat</div>
+          <input class="pf-input" id="sfPower" placeholder="50 kW">
+        </div>
+        <div style="flex:1;">
+          <div class="pf-label">Portlar soni</div>
+          <input class="pf-input" id="sfPorts" placeholder="4" type="number" min="1">
+        </div>
+      </div>
+      <div>
+        <div class="pf-label">Narx</div>
+        <input class="pf-input" id="sfPrice" placeholder="2500 so'm/kWh">
+      </div>
+
+      <div class="sf-contract-box" id="sfAgreeRow" onclick="sfToggleAgree()">
+        <div class="checkbox" id="sfCheckbox"><i class="ti ti-check" aria-hidden="true" style="display:none;"></i></div>
+        <div class="agree-text">Men <strong>Operator shartnomasi</strong> shartlari bilan tanishdim va stansiyani ushbu shartnoma asosida tizimga qo'shishga roziman</div>
+      </div>
+
+      <button class="btn-primary" id="sfSubmitBtn" onclick="submitStationForm()" disabled>Saqlash</button>
+      <div class="admin-login-err" id="sfErr">Iltimos, barcha majburiy maydonlarni to'ldiring</div>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div class="modal-overlay center hidden" id="confirmOverlay">
+  <div class="profile-modal" style="max-width:380px;text-align:center;padding:32px 28px;">
+    <div class="admin-login-icon" style="background:linear-gradient(135deg,var(--red),#b91c1c);"><i class="ti ti-trash" aria-hidden="true"></i></div>
+    <div style="font-size:17px;font-weight:700;margin-bottom:8px;" id="confirmTitle">Rostdan o'chirmoqchimisiz?</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:22px;" id="confirmSub">Bu amalni orqaga qaytarib bo'lmaydi.</div>
+    <button class="btn-primary" style="background:var(--red);margin-bottom:8px;" id="confirmActionBtn" onclick="">O'chirish</button>
+    <button class="btn-primary" style="background:var(--bg3);color:var(--text2);border:1px solid var(--border2);" onclick="closeConfirm()">Bekor qilish</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><i class="ti ti-check" aria-hidden="true"></i> <span id="toastMsg"></span></div>
+
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const stations = [
+  { id:1, name:"Yunusobod EV Station", addr:"Amir Temur ko'ch., 47", type:"ev", status:"open", dist:0.8, power:"50 kW", ports:4, avail:2, price:"2500 so'm/kWh", lat:41.3450, lng:69.2880, rating:4.8, speed:"Tez zaryadlash", img:null },
+  { id:2, name:"Shayxontohur ChargeHub", addr:"Navoi ko'ch., 12", type:"ev", status:"busy", dist:1.4, power:"22 kW", ports:6, avail:1, price:"1800 so'm/kWh", lat:41.3260, lng:69.2520, rating:4.5, speed:"Normal zaryadlash", img:null },
+  { id:3, name:"Chilonzor Powerbank", addr:"Farob ko'ch., 8", type:"power", status:"open", dist:2.1, power:"45W", ports:16, avail:11, price:"3000 so'm/soat", lat:41.2856, lng:69.2034, rating:4.7, speed:"USB-C / Lightning", img:null },
+  { id:4, name:"Sergeli Skuter Zone", addr:"Sergeli, 3-mavze", type:"scooter", status:"open", dist:3.5, power:"15 kW", ports:8, avail:5, price:"1200 so'm/soat", lat:41.2231, lng:69.2467, rating:4.3, speed:"Umumiy zaryadlash", img:null },
+  { id:5, name:"Mirzo Ulug'bek EV", addr:"Ko'yluk ko'ch., 21", type:"ev", status:"open", dist:1.9, power:"100 kW", ports:3, avail:3, price:"3200 so'm/kWh", lat:41.3392, lng:69.3360, rating:4.9, speed:"DC Tez zaryadlash", img:null },
+  { id:6, name:"Uchtepa Powerbank", addr:"Uchtepa, 15-uy", type:"power", status:"open", dist:2.8, power:"30W", ports:12, avail:8, price:"2500 so'm/soat", lat:41.3110, lng:69.1960, rating:4.2, speed:"USB-C / MicroUSB", img:null },
+  { id:7, name:"Bektemir EV Plaza", addr:"Bektemir, Sanoat ko'ch.", type:"ev", status:"closed", dist:4.2, power:"50 kW", ports:4, avail:0, price:"2200 so'm/kWh", lat:41.2386, lng:69.3478, rating:4.0, speed:"Tez zaryadlash", img:null },
+  { id:8, name:"Olmazor Skuter", addr:"Olmazor, Bog'bon ko'ch.", type:"scooter", status:"busy", dist:1.2, power:"10 kW", ports:6, avail:1, price:"1000 so'm/soat", lat:41.3580, lng:69.2280, rating:4.6, speed:"Standart", img:null },
+];
+
+let activeFilter = 'all';
+let activeStatus = 'all';
+let activeDist = 'any';
+let selectedId = null;
+let currentPhone = '';
+let userName = 'Jasur Karimov';
+let selectedSlot = '10:00';
+let selectedDur = 1;
+
+function sendSms() {
+  const ph = document.getElementById('phoneInput').value.replace(/\s/g,'');
+  if(ph.length < 9) { showToastRed('Telefon raqamni to\'liq kiriting'); return; }
+  currentPhone = ph;
+  document.getElementById('stepPhone').classList.add('hidden');
+  document.getElementById('stepOtp').classList.remove('hidden');
+  document.getElementById('step1dot').style.background='var(--green)';
+  document.getElementById('step2dot').style.background='var(--green)';
+  document.getElementById('otpSub').textContent='+998 '+ph.slice(0,2)+' *** ** **'+' ga yuborildi';
+  setTimeout(()=>document.getElementById('otp1').focus(),100);
+}
+
+function otpDigitsOnly(str) { return (str||'').replace(/\D/g,''); }
+
+function otpFillFrom(startN, digits) {
+  const boxes = [1,2,3,4].map(i=>document.getElementById('otp'+i));
+  const startIdx = startN - 1;
+  for(let i=0; i<digits.length && (startIdx+i)<4; i++){
+    boxes[startIdx+i].value = digits[i];
+  }
+  const lastFilled = Math.min(startIdx + digits.length, 4);
+  if(lastFilled < 4) boxes[lastFilled].focus();
+  else boxes[3].blur();
+}
+
+function otpNext(el, n) {
+  const digits = otpDigitsOnly(el.value);
+  if(digits.length > 1){
+    // Autofill/SMS suggestion dropped multiple digits into one box at once (bypasses maxlength) — spread them out
+    el.value = digits[0];
+    otpFillFrom(n, digits);
+    return;
+  }
+  el.value = digits;
+  if(digits.length===1 && n<4) document.getElementById('otp'+(n+1)).focus();
+}
+
+function otpPaste(e, n) {
+  const text = (e.clipboardData || window.clipboardData)?.getData('text') || '';
+  const digits = otpDigitsOnly(text);
+  if(!digits) return;
+  e.preventDefault();
+  otpFillFrom(n, digits);
+}
+
+function otpKeydown(e, n) {
+  if(e.key==='Backspace' && !e.target.value && n>1){
+    document.getElementById('otp'+(n-1)).focus();
+  }
+}
+
+function verifyOtp() {
+  const code = [1,2,3,4].map(i=>document.getElementById('otp'+i).value).join('');
+  if(code.length < 4) { showToastRed('SMS kodni to\'liq kiriting'); return; }
+  document.getElementById('stepOtp').classList.add('hidden');
+  document.getElementById('stepProfile').classList.remove('hidden');
+  document.getElementById('step3dot').style.background='var(--green)';
+}
+
+function resendCode() { showToast('Kod qayta yuborildi'); }
+
+function toggleCar(el) { el.classList.toggle('selected'); }
+
+function completeProfile() {
+  const n = document.getElementById('nameInput').value.trim();
+  if(n) userName = n;
+  document.getElementById('avatarBtn').textContent = userName[0].toUpperCase();
+  document.getElementById('authScreen').classList.add('hidden');
+  document.getElementById('mainApp').classList.remove('hidden');
+  renderStations();
+  initLeafletMap();
+}
+
+function filterStations() { renderStations(); renderMarkers(); }
+
+function toggleFilter(el, val) {
+  document.querySelectorAll('[data-f]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  activeFilter = val;
+  filterStations();
+}
+
+function toggleStatus(el, val) {
+  document.querySelectorAll('[data-s]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  activeStatus = val;
+  filterStations();
+}
+
+function toggleDist(el, val) {
+  document.querySelectorAll('[data-d]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  activeDist = val;
+  filterStations();
+}
+
+function getFiltered() {
+  const q = document.getElementById('searchInput')?.value.toLowerCase()||'';
+  return stations.filter(s=>{
+    if(activeFilter!=='all' && s.type!==activeFilter) return false;
+    if(activeStatus!=='all' && s.status!==activeStatus) return false;
+    if(activeDist!=='any' && s.dist > parseFloat(activeDist)) return false;
+    if(q && !s.name.toLowerCase().includes(q) && !s.addr.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+const typeLabel = { ev:'EV Zaryadlash', power:'Powerbank', scooter:'Skuter' };
+const typeIcon = { ev:'ti-bolt', power:'ti-device-mobile', scooter:'ti-motorbike' };
+
+function renderStations() {
+  const list = document.getElementById('stationList');
+  const filtered = getFiltered();
+  document.getElementById('stationCount').textContent = filtered.length + ' ta';
+  if(!filtered.length) { list.innerHTML='<div style="text-align:center;padding:30px 0;color:var(--text3);font-size:14px;"><i class="ti ti-search-off" style="font-size:32px;display:block;margin-bottom:8px;" aria-hidden="true"></i>Natija topilmadi</div>'; return; }
+  list.innerHTML = filtered.map(s=>`
+    <div class="station-card${s.id===selectedId?' selected':''}" onclick="selectStation(${s.id})">
+      <div class="card-top">
+        ${s.img?`<div class="card-icon-wrap ${s.type}" style="background-image:url('${s.img}');background-size:cover;background-position:center;"></div>`:`<div class="card-icon-wrap ${s.type}"><i class="ti ${typeIcon[s.type]}" aria-hidden="true"></i></div>`}
+        <div class="card-info">
+          <div class="card-name">${s.name}</div>
+          <div class="card-addr"><i class="ti ti-map-pin" style="font-size:12px;vertical-align:-1px;" aria-hidden="true"></i> ${s.addr}</div>
+        </div>
+        <div class="status-badge ${s.status}">${s.status==='open'?'Ochiq':s.status==='busy'?'Band':'Yopiq'}</div>
+      </div>
+      <div class="card-meta">
+        <div class="meta-item"><i class="ti ti-navigation" aria-hidden="true"></i> ${s.dist} km</div>
+        <div class="meta-item ${s.type==='ev'?'green':'amber'}"><i class="ti ti-bolt" aria-hidden="true"></i> ${s.power}</div>
+        <div class="meta-item"><i class="ti ti-plug" aria-hidden="true"></i> ${s.avail}/${s.ports} port</div>
+        <div class="meta-item"><i class="ti ti-star" aria-hidden="true"></i> ${s.rating}</div>
+      </div>
+      <div class="card-actions">
+        ${s.status!=='closed'?`<button class="btn-sm green" onclick="event.stopPropagation();openBooking(${s.id})"><i class="ti ti-calendar" aria-hidden="true"></i> Bron</button>`:''}
+        <button class="btn-sm outline" onclick="event.stopPropagation();showRoute(${s.id})"><i class="ti ti-navigation" aria-hidden="true"></i> Yo'l</button>
+        <button class="btn-sm outline" onclick="event.stopPropagation();openDetail(${s.id})"><i class="ti ti-info-circle" aria-hidden="true"></i> Batafsil</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+/* ================= LEAFLET MAP (USER APP) ================= */
+let leafletMap = null;
+let leafletMarkers = {};
+let userMarker = null;
+const TASHKENT_CENTER = [41.2995, 69.2401];
+
+function initLeafletMap() {
+  if(leafletMap) return;
+  if(typeof L === 'undefined'){
+    document.getElementById('leafletMap').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text3);font-size:13px;text-align:center;padding:20px;">Xarita yuklanmadi.<br>Internet aloqasini tekshirib, sahifani qayta yuklang.</div>';
+    showToastRed("Xarita kutubxonasi yuklanmadi");
+    return;
+  }
+  leafletMap = L.map('leafletMap', { zoomControl:false, attributionControl:false }).setView(TASHKENT_CENTER, 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(leafletMap);
+
+  userMarker = L.marker([41.3117, 69.2797], {
+    icon: L.divIcon({ className:'', html:'<div class="user-pin-dot"></div>', iconSize:[14,14] })
+  }).addTo(leafletMap);
+
+  renderMarkers();
+  setTimeout(()=>leafletMap.invalidateSize(), 200);
+}
+
+function stationIconHtml(s, selected) {
+  const color = s.type==='ev'?'#0a1628':s.type==='power'?'#0a1628':'white';
+  return `<div class="station-pin ${s.type}${selected?' selected':''}"><i class="ti ${typeIcon[s.type]}" style="color:${color};" aria-hidden="true"></i></div>`;
+}
+
+function renderMarkers() {
+  if(!leafletMap) return;
+  const filtered = getFiltered();
+  const filteredIds = new Set(filtered.map(s=>s.id));
+
+  Object.keys(leafletMarkers).forEach(id=>{
+    if(!filteredIds.has(parseInt(id))){
+      leafletMap.removeLayer(leafletMarkers[id]);
+      delete leafletMarkers[id];
+    }
+  });
+
+  filtered.forEach(s=>{
+    const html = stationIconHtml(s, s.id===selectedId);
+    if(leafletMarkers[s.id]){
+      leafletMarkers[s.id].setIcon(L.divIcon({ className:'', html, iconSize:[34,34], iconAnchor:[17,34] }));
+    } else {
+      const marker = L.marker([s.lat, s.lng], {
+        icon: L.divIcon({ className:'', html, iconSize:[34,34], iconAnchor:[17,34] })
+      }).addTo(leafletMap);
+      marker.bindPopup(stationPopupHtml(s));
+      marker.on('click', ()=>selectStation(s.id));
+      leafletMarkers[s.id] = marker;
+    }
+  });
+}
+
+function stationPopupHtml(s) {
+  const img = s.img ? `<img src="${s.img}" style="width:100%;height:80px;object-fit:cover;border-radius:8px;margin-bottom:8px;">` : '';
+  return `
+    <div class="map-popup-card">
+      ${img}
+      <div class="map-popup-name">${s.name}</div>
+      <div class="map-popup-addr">${s.addr}</div>
+      <div class="map-popup-meta"><span>${s.power}</span><span>${s.avail}/${s.ports} port</span><span>★ ${s.rating}</span></div>
+      <button class="map-popup-btn" onclick="openDetail(${s.id})">Batafsil</button>
+    </div>
+  `;
+}
+
+function locateUser() {
+  showToast('Joylashuv aniqlandi');
+  if(leafletMap) leafletMap.setView([41.3117, 69.2797], 13);
+}
+
+function selectStation(id) {
+  selectedId = id;
+  renderStations();
+  renderMarkers();
+  const s = stations.find(x=>x.id===id);
+  document.getElementById('dirDist').textContent = s.dist;
+  document.getElementById('dirTime').textContent = Math.round(s.dist*3);
+  document.getElementById('dirBar').classList.add('show');
+  if(leafletMap){
+    leafletMap.setView([s.lat, s.lng], 14, { animate:true });
+    if(leafletMarkers[id]) leafletMarkers[id].openPopup();
+  }
+}
+
+function openDetail(id) {
+  const s = stations.find(x=>x.id===id);
+  document.getElementById('modalTitle').textContent = s.name;
+  document.getElementById('modalBody').innerHTML = `
+    <div class="detail-banner" ${s.img?`style="background-image:url('${s.img}');background-size:cover;background-position:center;"`:''}>
+      ${s.img?'':`<i class="ti ${typeIcon[s.type]}" aria-hidden="true"></i>`}
+      <div class="detail-banner-badge status-badge ${s.status}">${s.status==='open'?'Ochiq':s.status==='busy'?'Band':'Yopiq'}</div>
+    </div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:14px;display:flex;align-items:center;gap:6px;"><i class="ti ti-map-pin" aria-hidden="true"></i> ${s.addr}</div>
+    <div class="detail-grid">
+      <div class="detail-box"><div class="detail-box-label">Quvvat</div><div class="detail-box-val green">${s.power}</div></div>
+      <div class="detail-box"><div class="detail-box-label">Masofa</div><div class="detail-box-val">${s.dist} km</div></div>
+      <div class="detail-box"><div class="detail-box-label">Narx</div><div class="detail-box-val" style="font-size:13px;">${s.price}</div></div>
+      <div class="detail-box"><div class="detail-box-label">Reyting</div><div class="detail-box-val amber">★ ${s.rating}</div></div>
+    </div>
+    <div class="ports-section">
+      <div style="font-size:13px;font-weight:600;color:var(--text2);margin-bottom:8px;">Portlar</div>
+      ${Array.from({length:Math.min(s.ports,4)},(_,i)=>`
+        <div class="port-item">
+          <div class="port-left">
+            <div class="port-tag">#${i+1}</div>
+            <div class="port-name">${s.type==='ev'?(i%2===0?'CCS2':'Type 2'):s.type==='power'?(i%3===0?'USB-C':'USB-A'):'Standart'}</div>
+          </div>
+          <div class="port-right">
+            <div class="port-status">${s.power}</div>
+            <div class="port-avail" style="color:${i<s.avail?'var(--green)':'var(--red)'};">${i<s.avail?'Bo\'sh':'Band'}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    ${s.status!=='closed'?`<button class="btn-primary" onclick="closeModal();openBooking(${s.id})"><i class="ti ti-calendar" style="font-size:16px;vertical-align:-2px;margin-right:6px;" aria-hidden="true"></i>Bron qilish</button>`:'<div style="text-align:center;color:var(--red);font-size:14px;padding:12px 0;">Bu stansiya hozir yopiq</div>'}
+  `;
+  document.getElementById('stationModal').classList.remove('hidden');
+}
+
+const times = ['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00'];
+const busyTimes = ['09:00','13:00','14:00','19:00'];
+
+function openBooking(id) {
+  openBookingFlow(id);
+}
+
+function showRoute(id) {
+  selectStation(id);
+  showToast('Yo\'nalish ko\'rsatilmoqda...');
+}
+
+function startNav() {
+  showToast('Navigatsiya boshlandi');
+}
+
+function closeModal() { document.getElementById('stationModal').classList.add('hidden'); }
+
+function openProfile() { document.getElementById('profileModal').classList.remove('hidden'); }
+function closeProfile() { document.getElementById('profileModal').classList.add('hidden'); }
+
+function saveProfile() {
+  userName = document.getElementById('pfName').value||userName;
+  document.getElementById('profileName').textContent = userName;
+  document.getElementById('profileAvatar').textContent = userName[0].toUpperCase();
+  document.getElementById('avatarBtn').textContent = userName[0].toUpperCase();
+  const msg = document.getElementById('pfSaveMsg');
+  msg.classList.remove('hidden');
+  setTimeout(()=>msg.classList.add('hidden'), 2500);
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.querySelector('i').className='ti ti-check';
+  t.style.borderColor='var(--green)';
+  t.style.color='var(--green)';
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+function showToastRed(msg) {
+  const t = document.getElementById('toast');
+  t.querySelector('i').className='ti ti-alert-circle';
+  t.style.borderColor='var(--red)';
+  t.style.color='var(--red)';
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+
+/* ================= FULL BOOKING FLOW ================= */
+let bfStep = 1;
+let bfStationId = null;
+let bfTime = '11:00';
+let bfDur = 1;
+let bfAgreed = false;
+let bfPayMethod = 'payme';
+const bfPmLabel = { payme:'Payme', uzum:'Uzum Pay', card:'Bank kartasi' };
+const bfRedirectMsg = {
+  payme: "Payme ilovasi avtomatik ochiladi va to'lov sahifasiga o'tasiz",
+  uzum: "Uzum Market ilovasi ochiladi. To'lov sahifasiga yo'naltirilasiz",
+  card: "Karta ma'lumotlarini kiriting (Humo / UzCard)"
+};
+
+function bfPriceFor(s, dur) {
+  const baseNum = parseInt(s.price.replace(/\D/g,''));
+  const total = Math.round(baseNum * (s.type==='ev'?15*dur:dur));
+  return total;
+}
+
+function openBookingFlow(id) {
+  const s = stations.find(x=>x.id===id);
+  if(!s) return;
+  bfStationId = id;
+  bfStep = 1;
+  bfTime = '11:00';
+  bfDur = 1;
+  bfAgreed = false;
+  bfPayMethod = 'payme';
+
+  document.getElementById('bfStationIcon').innerHTML = `<i class="ti ${typeIcon[s.type]}" aria-hidden="true"></i>`;
+  document.getElementById('bfStationName').textContent = s.name;
+  document.getElementById('bfStationAddr').textContent = s.addr + ' · ' + s.dist + ' km';
+
+  document.getElementById('bfTimeGrid').innerHTML = times.map(t=>{
+    const busy = busyTimes.includes(t);
+    return `<div class="bf-tslot${busy?' busy':''}${t===bfTime?' sel':''}" ${busy?'':`onclick="bfSelTime(this,'${t}')"`}>${t}</div>`;
+  }).join('');
+
+  document.querySelectorAll('.bf-dur').forEach((el,i)=>{
+    const vals=[0.5,1,2,3];
+    el.classList.toggle('sel', vals[i]===bfDur);
+  });
+
+  bfUpdatePrice();
+  bfResetTermsAndPayment();
+  bfShowStep(1);
+
+  document.getElementById('bookingFlow').classList.remove('hidden');
+  document.getElementById('stationModal').classList.add('hidden');
+  document.getElementById('bookingFlow').scrollTop = 0;
+}
+
+function closeBookingFlow() {
+  document.getElementById('bookingFlow').classList.add('hidden');
+}
+
+function bfResetTermsAndPayment() {
+  bfAgreed = false;
+  document.getElementById('bfCheckbox').classList.remove('checked');
+  document.getElementById('bfAgreeRow').classList.remove('checked');
+  document.getElementById('bfCheckbox').querySelector('i').style.display='none';
+  document.getElementById('bfBtnAgree').disabled = true;
+  bfSelPay('payme');
+}
+
+function bfSelTime(el, t) {
+  document.querySelectorAll('.bf-tslot:not(.busy)').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+  bfTime = t;
+}
+
+function bfSelDur(el, d) {
+  document.querySelectorAll('.bf-dur').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+  bfDur = d;
+  bfUpdatePrice();
+}
+
+function bfUpdatePrice() {
+  const s = stations.find(x=>x.id===bfStationId);
+  if(!s) return;
+  const total = bfPriceFor(s, bfDur);
+  const pre = Math.round(total*0.3);
+  const rest = total - pre;
+  document.getElementById('bfPsBase').textContent = total.toLocaleString()+" so'm";
+  document.getElementById('bfPsPre').textContent = pre.toLocaleString()+" so'm";
+  document.getElementById('bfPsRest').textContent = rest.toLocaleString()+" so'm";
+  document.getElementById('bfPsTotal').textContent = total.toLocaleString()+" so'm";
+  document.getElementById('bfPayAmount').textContent = pre.toLocaleString()+" so'm";
+}
+
+function bfToggleAgree() {
+  bfAgreed = !bfAgreed;
+  const cb = document.getElementById('bfCheckbox');
+  const row = document.getElementById('bfAgreeRow');
+  const btn = document.getElementById('bfBtnAgree');
+  cb.classList.toggle('checked', bfAgreed);
+  row.classList.toggle('checked', bfAgreed);
+  cb.querySelector('i').style.display = bfAgreed?'':'none';
+  btn.disabled = !bfAgreed;
+}
+
+function bfSelPay(m) {
+  bfPayMethod = m;
+  ['payme','uzum','card'].forEach(k=>{
+    const cap = k.charAt(0).toUpperCase()+k.slice(1);
+    document.getElementById('bfPm'+cap).classList.toggle('sel', k===m);
+    document.getElementById('bfR'+cap).classList.toggle('sel', k===m);
+  });
+  document.getElementById('bfRedirectText').textContent = bfRedirectMsg[m];
+}
+
+function bfShowStep(n) {
+  document.querySelectorAll('.bf-screen').forEach(e=>e.classList.remove('active'));
+  document.getElementById('bfs'+n).classList.add('active');
+  for(let i=1;i<=4;i++){
+    const sc = document.getElementById('bfsc'+i);
+    sc.classList.remove('active','done');
+    if(i<n){ sc.classList.add('done'); sc.innerHTML='<i class="ti ti-check" aria-hidden="true"></i>'; }
+    else if(i===n){ sc.classList.add('active'); sc.textContent=i; }
+    else { sc.textContent=i; }
+  }
+  for(let i=1;i<=3;i++){
+    document.getElementById('bfsl'+i).classList.toggle('done', i<n);
+  }
+  bfStep = n;
+  document.getElementById('bookingFlow').scrollTop = 0;
+}
+
+function bfGoStep(n) {
+  if(n===4) bfFinalize();
+  bfShowStep(n);
+}
+
+function bfFinalize() {
+  const s = stations.find(x=>x.id===bfStationId);
+  if(!s) return;
+  const total = bfPriceFor(s, bfDur);
+  const pre = Math.round(total*0.3);
+  const rest = total - pre;
+  const code = 'ZU-2026-' + Math.floor(1000+Math.random()*8999);
+
+  document.getElementById('bfFinalStation').textContent = s.name;
+  document.getElementById('bfFinalAddr').textContent = s.addr;
+  document.getElementById('bfFinalTime').textContent = bfTime;
+  document.getElementById('bfFinalDur').textContent = bfDur===0.5?'30 daqiqa':bfDur+' soat';
+  document.getElementById('bfFinalPort').textContent = (s.type==='ev'?'CCS2':s.type==='power'?'USB-C':'Standart') + ' — #1';
+  document.getElementById('bfFinalPaid').textContent = pre.toLocaleString()+" so'm";
+  document.getElementById('bfFinalPm').textContent = bfPmLabel[bfPayMethod];
+  document.getElementById('bfFinalRest').textContent = rest.toLocaleString()+" so'm (stansiyada)";
+  document.getElementById('bfFinalCode').textContent = code;
+
+  showToast('Bron tasdiqlandi! SMS yuborildi');
+}
+
+function bfGoNav() {
+  const s = stations.find(x=>x.id===bfStationId);
+  showToast((s?s.addr:'Manzil') + " — yo'nalish ko'rsatilmoqda");
+}
+
+/* ================= ADMIN PANEL ================= */
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'admin123';
+
+function openAdminLogin() {
+  closeProfile();
+  document.getElementById('adminUser').value='';
+  document.getElementById('adminPass').value='';
+  document.getElementById('adminLoginErr').classList.remove('show');
+  document.getElementById('adminLoginOverlay').classList.remove('hidden');
+}
+
+function closeAdminLogin() {
+  document.getElementById('adminLoginOverlay').classList.add('hidden');
+}
+
+function adminLogin() {
+  const u = document.getElementById('adminUser').value.trim();
+  const p = document.getElementById('adminPass').value;
+  if(u===ADMIN_USER && p===ADMIN_PASS) {
+    document.getElementById('adminLoginOverlay').classList.add('hidden');
+    document.getElementById('adminDashboardOverlay').classList.remove('hidden');
+    renderAdminDashboard();
+  } else {
+    document.getElementById('adminLoginErr').classList.add('show');
+  }
+}
+
+function adminLogout() {
+  document.getElementById('adminDashboardOverlay').classList.add('hidden');
+}
+
+function adminNav(el, view) {
+  document.querySelectorAll('.admin-nav-item').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.admin-view').forEach(e=>e.classList.remove('active'));
+  document.getElementById('av-'+view).classList.add('active');
+  if(view==='overview' && adminLeafletMap){
+    setTimeout(()=>adminLeafletMap.invalidateSize(), 100);
+  }
+}
+
+const adminStatusColor = { open:'var(--green)', busy:'var(--amber)', closed:'var(--red)' };
+const adminStatusLabel = { open:'Ochiq', busy:'Band', closed:'Yopiq' };
+
+const adminWeekData = [
+  { d:'Dush', v:280 }, { d:'Sesh', v:312 }, { d:'Chor', v:298 },
+  { d:'Pay', v:335 }, { d:'Juma', v:410 }, { d:'Shan', v:387 }, { d:'Yak', v:347 }
+];
+
+const adminBookings = [
+  { code:'ZU-2026-7732', user:'Jasur K.', station:'Yunusobod EV Station', time:'Bugun, 11:00', sum:'11,250 so\'m', status:'open' },
+  { code:'ZU-2026-7731', user:'Dilnoza R.', station:'Chilonzor Powerbank', time:'Bugun, 10:30', sum:'3,000 so\'m', status:'open' },
+  { code:'ZU-2026-7730', user:'Aziz T.', station:'Mirzo Ulug\'bek EV', time:'Bugun, 09:45', sum:'9,600 so\'m', status:'busy' },
+  { code:'ZU-2026-7729', user:'Madina S.', station:'Sergeli Skuter Zone', time:'Bugun, 09:20', sum:'1,200 so\'m', status:'open' },
+  { code:'ZU-2026-7728', user:'Bobur N.', station:'Shayxontohur ChargeHub', time:'Kecha, 19:10', sum:'5,400 so\'m', status:'open' },
+  { code:'ZU-2026-7727', user:'Kamola Y.', station:'Uchtepa Powerbank', time:'Kecha, 17:40', sum:'2,500 so\'m', status:'open' },
+];
+
+const adminCarTypeData = [
+  { name:'Tesla Model 3', pct:34, color:'var(--green)' },
+  { name:'BYD Atto', pct:27, color:'var(--blue)' },
+  { name:'Chevrolet Bolt', pct:18, color:'var(--amber)' },
+  { name:'Nexon EV', pct:12, color:'var(--purple)' },
+  { name:'Boshqa', pct:9, color:'var(--text3)' },
+];
+
+const adminPayMethodData = [
+  { name:'Payme', pct:48, color:'#007aff' },
+  { name:'Uzum Pay', pct:31, color:'#9b59b6' },
+  { name:'Bank kartasi', pct:21, color:'var(--text2)' },
+];
+
+let adminUsers = [
+  { id:1, name:'Jasur Karimov', phone:'+998 90 123 45 67', bookings:14, joined:'12.01.2026', blocked:false },
+  { id:2, name:'Dilnoza Rashidova', phone:'+998 93 456 12 34', bookings:7, joined:'03.02.2026', blocked:false },
+  { id:3, name:'Aziz Tursunov', phone:'+998 91 789 65 43', bookings:21, joined:'28.11.2025', blocked:false },
+  { id:4, name:'Madina Saidova', phone:'+998 97 234 56 78', bookings:3, joined:'15.03.2026', blocked:false },
+  { id:5, name:'Bobur Nazarov', phone:'+998 99 567 89 01', bookings:9, joined:'07.02.2026', blocked:true },
+  { id:6, name:'Kamola Yusupova', phone:'+998 90 345 67 89', bookings:5, joined:'22.04.2026', blocked:false },
+  { id:7, name:'Sherzod Aliyev', phone:'+998 94 678 90 12', bookings:18, joined:'09.12.2025', blocked:false },
+];
+
+function renderAdminDashboard() {
+  renderAdminMap();
+  renderAdminBars();
+  renderAdminActivity();
+  renderAdminStationTable();
+  renderAdminBookingTable();
+  renderAdminRevenue();
+  renderAdminCarTypes();
+  renderAdminUserTable();
+}
+
+let adminLeafletMap = null;
+let adminLeafletMarkers = {};
+
+function renderAdminMap() {
+  if(typeof L === 'undefined'){
+    document.getElementById('adminLeafletMap').innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text3);font-size:13px;text-align:center;padding:20px;">Xarita yuklanmadi.<br>Internet aloqasini tekshirib, sahifani qayta yuklang.</div>';
+    return;
+  }
+  if(!adminLeafletMap){
+    adminLeafletMap = L.map('adminLeafletMap', { zoomControl:false, attributionControl:false }).setView(TASHKENT_CENTER, 11);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(adminLeafletMap);
+    setTimeout(()=>adminLeafletMap.invalidateSize(), 250);
+  }
+
+  const currentIds = new Set(stations.map(s=>s.id));
+  Object.keys(adminLeafletMarkers).forEach(id=>{
+    if(!currentIds.has(parseInt(id))){
+      adminLeafletMap.removeLayer(adminLeafletMarkers[id]);
+      delete adminLeafletMarkers[id];
+    }
+  });
+
+  stations.forEach(s=>{
+    const html = `<div class="admin-map-pin ${s.status}"><i class="ti ${typeIcon[s.type]}" aria-hidden="true"></i></div>`;
+    if(adminLeafletMarkers[s.id]){
+      adminLeafletMarkers[s.id].setIcon(L.divIcon({ className:'', html, iconSize:[26,26], iconAnchor:[13,26] }));
+      adminLeafletMarkers[s.id].setLatLng([s.lat, s.lng]);
+    } else {
+      const marker = L.marker([s.lat, s.lng], {
+        icon: L.divIcon({ className:'', html, iconSize:[26,26], iconAnchor:[13,26] })
+      }).addTo(adminLeafletMap);
+      marker.bindPopup(`<div class="map-popup-card"><div class="map-popup-name">${s.name}</div><div class="map-popup-addr">${s.addr}</div></div>`);
+      adminLeafletMarkers[s.id] = marker;
+    }
+  });
+}
+
+function renderAdminBars() {
+  const c = document.getElementById('adminBars');
+  const max = Math.max(...adminWeekData.map(d=>d.v));
+  c.innerHTML = adminWeekData.map(d=>`
+    <div class="admin-bar-col">
+      <div class="admin-bar" style="height:${Math.round((d.v/max)*100)}%;" title="${d.v} bron"></div>
+      <div class="admin-bar-label">${d.d}</div>
+    </div>
+  `).join('');
+}
+
+function renderAdminActivity() {
+  const c = document.getElementById('adminActivityList');
+  c.innerHTML = adminBookings.slice(0,5).map(b=>`
+    <div class="admin-list-row">
+      <div class="admin-list-left">
+        <div class="admin-list-icon" style="background:rgba(0,214,143,0.12);color:var(--green);"><i class="ti ti-calendar-event" aria-hidden="true"></i></div>
+        <div>
+          <div class="admin-list-name">${b.user} — ${b.station}</div>
+          <div class="admin-list-sub">${b.time} · ${b.code}</div>
+        </div>
+      </div>
+      <div class="admin-list-val">${b.sum}</div>
+    </div>
+  `).join('');
+}
+
+function renderAdminStationTable() {
+  const tbody = document.getElementById('adminStationTable');
+  tbody.innerHTML = stations.map(s=>{
+    const occ = Math.round(((s.ports-s.avail)/s.ports)*100);
+    const occColor = occ>70?'var(--red)':occ>40?'var(--amber)':'var(--green)';
+    const todaysBookings = Math.max(3, Math.round((s.ports-s.avail)*7 + s.dist));
+    const thumb = s.img
+      ? `<img class="admin-table-thumb" src="${s.img}">`
+      : `<div class="admin-table-thumb-placeholder"><i class="ti ${typeIcon[s.type]}" aria-hidden="true"></i></div>`;
+    return `
+    <tr>
+      <td>${thumb}</td>
+      <td>
+        <div class="admin-row-name">${s.name}</div>
+        <div class="admin-row-sub">${s.addr}</div>
+      </td>
+      <td>${typeLabel[s.type]}</td>
+      <td><span class="admin-mini-status ${s.status}">${adminStatusLabel[s.status]}</span></td>
+      <td>
+        <span class="admin-occ-bar-bg"><span class="admin-occ-bar-fill" style="width:${occ}%;background:${occColor};"></span></span>
+        ${occ}% (${s.ports-s.avail}/${s.ports})
+      </td>
+      <td>${todaysBookings}</td>
+      <td>★ ${s.rating}</td>
+      <td style="white-space:nowrap;">
+        <span class="admin-action-btn" onclick="openStationForm(${s.id})" title="Tahrirlash"><i class="ti ti-pencil" aria-hidden="true"></i></span>
+        <span class="admin-action-btn danger" onclick="confirmDeleteStation(${s.id})" title="O'chirish"><i class="ti ti-trash" aria-hidden="true"></i></span>
+      </td>
+    </tr>
+  `;
+  }).join('');
+}
+
+function renderAdminBookingTable() {
+  const tbody = document.getElementById('adminBookingTable');
+  tbody.innerHTML = adminBookings.map(b=>`
+    <tr>
+      <td style="font-family:monospace;color:var(--amber);">${b.code}</td>
+      <td>${b.user}</td>
+      <td>${b.station}</td>
+      <td>${b.time}</td>
+      <td>${b.sum}</td>
+      <td><span class="admin-mini-status ${b.status==='busy'?'busy':'open'}">${b.status==='busy'?'Kutilmoqda':'Tasdiqlangan'}</span></td>
+    </tr>
+  `).join('');
+}
+
+function renderAdminRevenue() {
+  const byStation = document.getElementById('adminRevByStation');
+  const revs = [
+    { name:'Yunusobod EV Station', amt:4820000 },
+    { name:"Mirzo Ulug'bek EV", amt:3960000 },
+    { name:'Shayxontohur ChargeHub', amt:2740000 },
+    { name:'Chilonzor Powerbank', amt:1980000 },
+    { name:'Sergeli Skuter Zone', amt:1310000 },
+  ];
+  const maxAmt = Math.max(...revs.map(r=>r.amt));
+  byStation.innerHTML = revs.map(r=>`
+    <div class="admin-list-row">
+      <div class="admin-list-left">
+        <div style="flex:1;">
+          <div class="admin-list-name">${r.name}</div>
+          <div class="admin-occ-bar-bg" style="width:140px;margin-top:5px;"><span class="admin-occ-bar-fill" style="width:${Math.round((r.amt/maxAmt)*100)}%;background:var(--green);"></span></div>
+        </div>
+      </div>
+      <div class="admin-list-val">${(r.amt/1000000).toFixed(1)}M</div>
+    </div>
+  `).join('');
+
+  const byMethod = document.getElementById('adminRevByMethod');
+  byMethod.innerHTML = adminPayMethodData.map(m=>`
+    <div class="admin-list-row">
+      <div class="admin-list-left">
+        <div class="admin-list-icon" style="background:${m.color};color:white;font-size:11px;font-weight:800;">${m.name[0]}</div>
+        <div>
+          <div class="admin-list-name">${m.name}</div>
+          <div class="admin-occ-bar-bg" style="margin-top:4px;"><span class="admin-occ-bar-fill" style="width:${m.pct}%;background:${m.color};"></span></div>
+        </div>
+      </div>
+      <div class="admin-list-val">${m.pct}%</div>
+    </div>
+  `).join('');
+}
+
+function renderAdminCarTypes() {
+  const c = document.getElementById('adminCarTypes');
+  c.innerHTML = adminCarTypeData.map(t=>`
+    <div class="admin-list-row">
+      <div class="admin-list-left">
+        <div class="admin-list-icon" style="background:${t.color};color:#0a1628;"><i class="ti ti-car" aria-hidden="true"></i></div>
+        <div>
+          <div class="admin-list-name">${t.name}</div>
+          <div class="admin-occ-bar-bg" style="margin-top:4px;"><span class="admin-occ-bar-fill" style="width:${t.pct}%;background:${t.color};"></span></div>
+        </div>
+      </div>
+      <div class="admin-list-val">${t.pct}%</div>
+    </div>
+  `).join('');
+}
+
+/* ================= ADMIN: USERS ================= */
+function renderAdminUserTable() {
+  const tbody = document.getElementById('adminUserTable');
+  tbody.innerHTML = adminUsers.map(u=>`
+    <tr style="${u.blocked?'opacity:0.55;':''}">
+      <td>
+        <div class="admin-row-name">${u.name}</div>
+      </td>
+      <td>${u.phone}</td>
+      <td>${u.bookings}</td>
+      <td>${u.joined}</td>
+      <td><span class="admin-mini-status ${u.blocked?'closed':'open'}">${u.blocked?'Bloklangan':'Faol'}</span></td>
+      <td style="white-space:nowrap;">
+        <span class="admin-action-btn ${u.blocked?'':'warn'}" onclick="toggleBlockUser(${u.id})" title="${u.blocked?'Blokdan chiqarish':'Bloklash'}">
+          <i class="ti ${u.blocked?'ti-lock-open':'ti-lock'}" aria-hidden="true"></i>
+        </span>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function toggleBlockUser(id) {
+  const u = adminUsers.find(x=>x.id===id);
+  if(!u) return;
+  if(u.blocked){
+    u.blocked = false;
+    renderAdminUserTable();
+    showToast(u.name + ' blokdan chiqarildi');
+  } else {
+    openConfirm({
+      title: "Foydalanuvchini bloklash",
+      sub: u.name + " ilovaga kira olmaydi va yangi bron qila olmaydi. Davom etasizmi?",
+      actionLabel: "Bloklash",
+      onConfirm: () => {
+        u.blocked = true;
+        renderAdminUserTable();
+        showToast(u.name + ' bloklandi');
+      }
+    });
+  }
+}
+
+/* ================= ADMIN: STATION FORM (add/edit) ================= */
+let sfEditId = null;
+let sfImageData = null;
+let sfAgreed = false;
+
+function sfSelectChip(el, groupId) {
+  document.querySelectorAll('#'+groupId+' .car-type-chip').forEach(e=>e.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function sfGetChipValue(groupId) {
+  const sel = document.querySelector('#'+groupId+' .car-type-chip.selected');
+  return sel ? sel.dataset.v : null;
+}
+
+function sfHandleImage(ev) {
+  const file = ev.target.files[0];
+  if(!file) return;
+  if(!file.type.startsWith('image/')) { showToastRed('Faqat rasm fayli yuklang'); return; }
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    sfImageData = e.target.result;
+    const preview = document.getElementById('sfImagePreview');
+    preview.src = sfImageData;
+    preview.classList.remove('hidden');
+    document.getElementById('sfImagePlaceholder').classList.add('hidden');
+  };
+  reader.readAsDataURL(file);
+}
+
+function sfToggleAgree() {
+  sfAgreed = !sfAgreed;
+  const cb = document.getElementById('sfCheckbox');
+  const row = document.getElementById('sfAgreeRow');
+  cb.classList.toggle('checked', sfAgreed);
+  row.classList.toggle('checked', sfAgreed);
+  cb.querySelector('i').style.display = sfAgreed?'':'none';
+  document.getElementById('sfSubmitBtn').disabled = !sfAgreed;
+}
+
+function openStationForm(id) {
+  sfEditId = id || null;
+  sfImageData = null;
+  sfAgreed = false;
+
+  document.getElementById('sfErr').classList.remove('show');
+  document.getElementById('sfCheckbox').classList.remove('checked');
+  document.getElementById('sfAgreeRow').classList.remove('checked');
+  document.getElementById('sfCheckbox').querySelector('i').style.display = 'none';
+  document.getElementById('sfSubmitBtn').disabled = true;
+  document.getElementById('sfImagePreview').classList.add('hidden');
+  document.getElementById('sfImagePlaceholder').classList.remove('hidden');
+
+  if(sfEditId){
+    const s = stations.find(x=>x.id===sfEditId);
+    document.getElementById('stationFormTitle').textContent = 'Stansiyani tahrirlash';
+    document.getElementById('sfName').value = s.name;
+    document.getElementById('sfAddr').value = s.addr;
+    document.getElementById('sfLat').value = s.lat;
+    document.getElementById('sfLng').value = s.lng;
+    document.getElementById('sfPower').value = s.power;
+    document.getElementById('sfPorts').value = s.ports;
+    document.getElementById('sfPrice').value = s.price;
+    sfSetChip('sfTypeChips', s.type);
+    sfSetChip('sfStatusChips', s.status);
+    if(s.img){
+      sfImageData = s.img;
+      document.getElementById('sfImagePreview').src = s.img;
+      document.getElementById('sfImagePreview').classList.remove('hidden');
+      document.getElementById('sfImagePlaceholder').classList.add('hidden');
+    }
+    // editing an existing station: contract already in effect
+    sfAgreed = true;
+    document.getElementById('sfCheckbox').classList.add('checked');
+    document.getElementById('sfAgreeRow').classList.add('checked');
+    document.getElementById('sfCheckbox').querySelector('i').style.display = '';
+    document.getElementById('sfSubmitBtn').disabled = false;
+  } else {
+    document.getElementById('stationFormTitle').textContent = "Stansiya qo'shish";
+    document.getElementById('sfName').value = '';
+    document.getElementById('sfAddr').value = '';
+    document.getElementById('sfLat').value = '';
+    document.getElementById('sfLng').value = '';
+    document.getElementById('sfPower').value = '';
+    document.getElementById('sfPorts').value = '';
+    document.getElementById('sfPrice').value = '';
+    sfSetChip('sfTypeChips', 'ev');
+    sfSetChip('sfStatusChips', 'open');
+  }
+
+  document.getElementById('stationFormOverlay').classList.remove('hidden');
+}
+
+function sfSetChip(groupId, value) {
+  document.querySelectorAll('#'+groupId+' .car-type-chip').forEach(e=>{
+    e.classList.toggle('selected', e.dataset.v===value);
+  });
+}
+
+function closeStationForm() {
+  document.getElementById('stationFormOverlay').classList.add('hidden');
+}
+
+function submitStationForm() {
+  const name = document.getElementById('sfName').value.trim();
+  const addr = document.getElementById('sfAddr').value.trim();
+  const lat = parseFloat(document.getElementById('sfLat').value);
+  const lng = parseFloat(document.getElementById('sfLng').value);
+  const power = document.getElementById('sfPower').value.trim();
+  const ports = parseInt(document.getElementById('sfPorts').value);
+  const price = document.getElementById('sfPrice').value.trim();
+  const type = sfGetChipValue('sfTypeChips');
+  const status = sfGetChipValue('sfStatusChips');
+
+  if(!name || !addr || isNaN(lat) || isNaN(lng) || !power || !ports || !price || !sfAgreed){
+    document.getElementById('sfErr').classList.add('show');
+    return;
+  }
+  document.getElementById('sfErr').classList.remove('show');
+
+  if(sfEditId){
+    const s = stations.find(x=>x.id===sfEditId);
+    Object.assign(s, { name, addr, lat, lng, power, ports, price, type, status, avail: Math.min(s.avail, ports) });
+    if(sfImageData) s.img = sfImageData;
+    showToast('Stansiya yangilandi');
+  } else {
+    const newId = Math.max(0, ...stations.map(x=>x.id)) + 1;
+    stations.push({
+      id: newId, name, addr, type, status, dist: (Math.random()*4+0.5).toFixed(1)*1,
+      power, ports, avail: ports, price, lat, lng, rating: 4.5, speed: power,
+      img: sfImageData
+    });
+    showToast('Stansiya qo\'shildi');
+  }
+
+  closeStationForm();
+  renderAdminStationTable();
+  renderAdminMap();
+  renderStations();
+  renderMarkers();
+}
+
+function confirmDeleteStation(id) {
+  const s = stations.find(x=>x.id===id);
+  if(!s) return;
+  openConfirm({
+    title: "Stansiyani o'chirish",
+    sub: `"${s.name}" butunlay o'chiriladi. Bu amalni qaytarib bo'lmaydi.`,
+    actionLabel: "O'chirish",
+    onConfirm: () => {
+      const idx = stations.findIndex(x=>x.id===id);
+      if(idx>-1) stations.splice(idx,1);
+      if(adminLeafletMarkers[id]){
+        adminLeafletMap.removeLayer(adminLeafletMarkers[id]);
+        delete adminLeafletMarkers[id];
+      }
+      if(leafletMarkers[id]){
+        leafletMap.removeLayer(leafletMarkers[id]);
+        delete leafletMarkers[id];
+      }
+      renderAdminStationTable();
+      renderAdminMap();
+      renderStations();
+      renderMarkers();
+      showToast("Stansiya o'chirildi");
+    }
+  });
+}
+
+/* ================= GENERIC CONFIRM MODAL ================= */
+let confirmCallback = null;
+
+function openConfirm({title, sub, actionLabel, onConfirm}) {
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmSub').textContent = sub;
+  const btn = document.getElementById('confirmActionBtn');
+  btn.textContent = actionLabel;
+  confirmCallback = onConfirm;
+  btn.onclick = function(){
+    if(confirmCallback) confirmCallback();
+    closeConfirm();
+  };
+  document.getElementById('confirmOverlay').classList.remove('hidden');
+}
+
+function closeConfirm() {
+  document.getElementById('confirmOverlay').classList.add('hidden');
+}
+</script>
+</body>
+</html>
