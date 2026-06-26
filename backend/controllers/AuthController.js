@@ -3,6 +3,7 @@ const User = require('../models/User');
 const validate = require('../middleware/validate');
 const { otpLimiter } = require('../middleware/rateLimiter');
 const logger = require('../utils/logger');
+const jwt = require('jsonwebtoken');
 
 // In-memory OTP store (use Redis in production)
 const otpStore = new Map();
