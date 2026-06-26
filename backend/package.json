@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js",
-    "db:migrate": "node database/migrate.js",
-    "db:seed": "node database/seed.js"
+    "db:migrate": "node migrate.js",
+    "db:seed": "node seed.js"
   },
   "keywords": ["ev", "charging", "station", "booking"],
   "author": "",

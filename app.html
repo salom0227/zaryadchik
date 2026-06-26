@@ -1870,25 +1870,96 @@ function otpKeydown(e, n) {
   }
 }
 
-function verifyOtp() {
+async function verifyOtp() {
   const code = [1,2,3,4].map(i=>document.getElementById('otp'+i).value).join('');
   if(code.length < 4) { showToastRed('SMS kodni to\'liq kiriting'); return; }
-  document.getElementById('stepOtp').classList.add('hidden');
-  document.getElementById('stepProfile').classList.remove('hidden');
-  document.getElementById('step3dot').style.background='var(--green)';
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/verify-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: currentPhone, otp: code })
+    });
+    
+    const data = await response.json();
+    
+    if(data.success) {
+      // Save tokens
+      authToken = data.data.accessToken;
+      refreshToken = data.data.refreshToken;
+      currentUser = data.data.user;
+      
+      // Save to localStorage
+      localStorage.setItem('zaryaduz_token', authToken);
+      localStorage.setItem('zaryaduz_refresh', refreshToken);
+      localStorage.setItem('zaryaduz_user', JSON.stringify(currentUser));
+      
+      // Update UI
+      userName = currentUser.name || '';
+      document.getElementById('avatarBtn').textContent = userName ? userName[0].toUpperCase() : 'U';
+      document.getElementById('stepOtp').classList.add('hidden');
+      document.getElementById('stepProfile').classList.remove('hidden');
+      document.getElementById('step3dot').style.background='var(--green)';
+      
+      // If new user, show profile form; otherwise complete
+      if(data.isNewUser || !currentUser.name) {
+        showToast('Xush kelibsiz! Iltimos, profilingizni to\'ldiring');
+      } else {
+        completeProfile();
+      }
+    } else {
+      showToastRed(data.message || 'Tasdiqlashda xatolik');
+    }
+  } catch(error) {
+    console.error('Verify OTP error:', error);
+    // Fallback for demo
+    document.getElementById('stepOtp').classList.add('hidden');
+    document.getElementById('stepProfile').classList.remove('hidden');
+    document.getElementById('step3dot').style.background='var(--green)';
+    showToast('Demo mode: Profilni to\'ldiring');
+  }
 }
 
 function resendCode() { showToast('Kod qayta yuborildi'); }
 
 function toggleCar(el) { el.classList.toggle('selected'); }
 
-function completeProfile() {
+async function completeProfile() {
   const n = document.getElementById('nameInput').value.trim();
+  const carTypes = [];
+  document.querySelectorAll('.car-type-selector .selected').forEach(el => {
+    carTypes.push(el.dataset.type);
+  });
+  
   if(n) userName = n;
-  document.getElementById('avatarBtn').textContent = userName[0].toUpperCase();
+  
+  // Update profile via API if user is logged in
+  if(currentUser && authToken) {
+    try {
+      await fetch(`${API_BASE_URL}/auth/profile`, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}`
+        },
+        body: JSON.stringify({ name: n, car_types: carTypes })
+      });
+      
+      // Update local user data
+      currentUser.name = n;
+      currentUser.car_types = carTypes;
+      localStorage.setItem('zaryaduz_user', JSON.stringify(currentUser));
+    } catch(error) {
+      console.error('Update profile error:', error);
+    }
+  }
+  
+  document.getElementById('avatarBtn').textContent = userName ? userName[0].toUpperCase() : 'U';
   document.getElementById('authScreen').classList.add('hidden');
   document.getElementById('mainApp').classList.remove('hidden');
-  renderStations();
+  
+  // Load stations from API
+  await loadStations();
   initLeafletMap();
 }
 
@@ -1913,6 +1984,49 @@ function toggleDist(el, val) {
   el.classList.add('active');
   activeDist = val;
   filterStations();
+}
+
+// API Functions
+async function loadStations() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/stations`, {
+      headers: authToken ? { 'Authorization': `Bearer ${authToken}` } : {}
+    });
+    
+    const data = await response.json();
+    
+    if(data.success && data.data) {
+      // Transform backend data to frontend format
+      stations = data.data.map(s => ({
+        id: s.id,
+        name: s.name,
+        addr: s.address,
+        type: s.type,
+        status: s.status,
+        dist: (Math.random()*4+0.5).toFixed(1)*1, // Calculate real distance later
+        power: s.power,
+        ports: s.total_ports,
+        avail: s.available_ports,
+        price: s.price_per_unit,
+        lat: parseFloat(s.latitude),
+        lng: parseFloat(s.longitude),
+        rating: s.rating || 4.5,
+        speed: s.power,
+        img: s.image_url ? `${API_BASE_URL.replace('/api', '')}${s.image_url}` : null
+      }));
+      
+      renderStations();
+      renderMarkers();
+    } else {
+      showToastRed('Stansiyalarni yuklashda xatolik');
+    }
+  } catch(error) {
+    console.error('Load stations error:', error);
+    // Use demo data if API fails
+    stations = [];
+    renderStations();
+    showToast('Demo rejim: Stansiyalar mavjud emas');
+  }
 }
 
 function getFiltered() {
