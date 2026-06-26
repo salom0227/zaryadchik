@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
 const User = require('../models/User');
 const Booking = require('../models/Booking');
 const Station = require('../models/Station');
@@ -7,6 +9,29 @@ const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const logger = require('../utils/logger');
 const validate = require('../middleware/validate');
 const { body, param } = require('express-validator');
+
+// Configure multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/');
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'station-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: parseInt(process.env.MAX_FILE_SIZE) || 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only image files are allowed'), false);
+    }
+  }
+});
 
 // All admin routes require authentication and admin role
 router.use(authMiddleware);
@@ -119,12 +144,14 @@ router.put('/users/:id/unblock', async (req, res) => {
 
 // POST /api/admin/stations - Create new station
 router.post('/stations',
+  upload.single('image'),
   body('name').trim().notEmpty().withMessage('Stansiya nomi required'),
   body('address').trim().notEmpty().withMessage('Manzil required'),
   body('latitude').isFloat({ min: -90, max: 90 }).withMessage('Latitude noto\'g\'ri'),
   body('longitude').isFloat({ min: -180, max: 180 }).withMessage('Longitude noto\'g\'ri'),
-  body('type').trim().notEmpty().withMessage('Stansiya turi required'),
-  body('price_per_minute').isFloat({ min: 0 }).withMessage('Narx musbat bo\'lishi kerak'),
+  body('type').trim().notEmpty().withMessage('Stansiya turi required').isIn(['ev', 'power', 'scooter']).withMessage('Turi ev, power yoki scooter bo\'lishi kerak'),
+  body('price_per_unit').trim().notEmpty().withMessage('Narx required'),
+  body('total_ports').optional().isInt({ min: 1 }).withMessage('Portlar soni musbat raqam bo\'lishi kerak'),
   validate,
   async (req, res) => {
     try {
@@ -156,7 +183,16 @@ router.post('/stations',
 
 // PUT /api/admin/stations/:id - Update station
 router.put('/stations/:id',
+  upload.single('image'),
   param('id').isInt().withMessage('Stansiya ID raqam bo\'lishi kerak'),
+  body('name').optional().trim(),
+  body('address').optional().trim(),
+  body('latitude').optional().isFloat({ min: -90, max: 90 }),
+  body('longitude').optional().isFloat({ min: -180, max: 180 }),
+  body('type').optional().isIn(['ev', 'power', 'scooter']),
+  body('status').optional().isIn(['open', 'busy', 'closed']),
+  body('price_per_unit').optional().trim(),
+  body('total_ports').optional().isInt({ min: 1 }),
   validate,
   async (req, res) => {
     try {

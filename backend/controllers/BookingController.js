@@ -2,20 +2,42 @@ const Booking = require('../models/Booking');
 const Station = require('../models/Station');
 const { bookingValidators } = require('../services/validators');
 const logger = require('../utils/logger');
+const pool = require('../config/database');
 
 class BookingController {
-  // Create new booking
+  // Create new booking with transaction to prevent race conditions
   static async create(req, res) {
+    const client = await pool.connect();
+    
     try {
       const userId = req.user.id;
       const { station_id, booking_time, duration_minutes, payment_method, port_number } = req.body;
 
-      // Get station to calculate price
-      const station = await Station.findById(station_id);
+      // Begin transaction
+      await client.query('BEGIN');
+
+      // Get station with lock to prevent race conditions
+      const stationResult = await client.query(
+        'SELECT * FROM stations WHERE id = $1 FOR UPDATE',
+        [station_id]
+      );
+      
+      const station = stationResult.rows[0];
+      
       if (!station) {
+        await client.query('ROLLBACK');
         return res.status(404).json({
           success: false,
           message: 'Stansiya topilmadi'
+        });
+      }
+
+      // Check availability within transaction
+      if (station.available_ports < 1) {
+        await client.query('ROLLBACK');
+        return res.status(400).json({
+          success: false,
+          message: 'Band qilish uchun bo\'sh portlar mavjud emas'
         });
       }
 
@@ -44,23 +66,25 @@ class BookingController {
       // Determine assigned port
       const assignedPort = port_number || 1;
 
-      const booking = await Booking.create({
-        user_id: userId,
-        station_id,
-        booking_time,
-        duration_minutes,
-        total_amount: totalAmount,
-        prepaid_amount: prepaidAmount,
-        remaining_amount: remainingAmount,
-        port_number: assignedPort,
-        payment_method,
-        status: 'confirmed',
-        booking_code: bookingCode
-      });
+      // Create booking within transaction
+      const bookingQuery = `
+        INSERT INTO bookings (user_id, station_id, booking_time, duration_minutes, total_amount, prepaid_amount, remaining_amount, port_number, payment_method, status, booking_code)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+        RETURNING *
+      `;
+      const bookingValues = [userId, station_id, booking_time, duration_minutes, totalAmount, prepaidAmount, remainingAmount, assignedPort, payment_method, 'confirmed', bookingCode];
+      const bookingResult = await client.query(bookingQuery, bookingValues);
+      const booking = bookingResult.rows[0];
 
-      // Update station availability
-      const newAvailablePorts = Math.max(0, station.available_ports - 1);
-      await Station.updateAvailability(station_id, newAvailablePorts);
+      // Update station availability within transaction
+      const newAvailablePorts = station.available_ports - 1;
+      await client.query(
+        'UPDATE stations SET available_ports = $1, updated_at = NOW() WHERE id = $2',
+        [newAvailablePorts, station_id]
+      );
+
+      // Commit transaction
+      await client.query('COMMIT');
 
       logger.info(`Booking created: ${bookingCode} by user ${userId}`);
 
@@ -74,11 +98,15 @@ class BookingController {
         }
       });
     } catch (error) {
+      // Rollback transaction on error
+      await client.query('ROLLBACK');
       logger.error('Create booking error:', error);
       res.status(500).json({
         success: false,
         message: 'Bron qilishda xatolik'
       });
+    } finally {
+      client.release();
     }
   }
 
