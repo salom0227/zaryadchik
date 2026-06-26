@@ -1773,36 +1773,62 @@
 
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-const stations = [
-  { id:1, name:"Yunusobod EV Station", addr:"Amir Temur ko'ch., 47", type:"ev", status:"open", dist:0.8, power:"50 kW", ports:4, avail:2, price:"2500 so'm/kWh", lat:41.3450, lng:69.2880, rating:4.8, speed:"Tez zaryadlash", img:null },
-  { id:2, name:"Shayxontohur ChargeHub", addr:"Navoi ko'ch., 12", type:"ev", status:"busy", dist:1.4, power:"22 kW", ports:6, avail:1, price:"1800 so'm/kWh", lat:41.3260, lng:69.2520, rating:4.5, speed:"Normal zaryadlash", img:null },
-  { id:3, name:"Chilonzor Powerbank", addr:"Farob ko'ch., 8", type:"power", status:"open", dist:2.1, power:"45W", ports:16, avail:11, price:"3000 so'm/soat", lat:41.2856, lng:69.2034, rating:4.7, speed:"USB-C / Lightning", img:null },
-  { id:4, name:"Sergeli Skuter Zone", addr:"Sergeli, 3-mavze", type:"scooter", status:"open", dist:3.5, power:"15 kW", ports:8, avail:5, price:"1200 so'm/soat", lat:41.2231, lng:69.2467, rating:4.3, speed:"Umumiy zaryadlash", img:null },
-  { id:5, name:"Mirzo Ulug'bek EV", addr:"Ko'yluk ko'ch., 21", type:"ev", status:"open", dist:1.9, power:"100 kW", ports:3, avail:3, price:"3200 so'm/kWh", lat:41.3392, lng:69.3360, rating:4.9, speed:"DC Tez zaryadlash", img:null },
-  { id:6, name:"Uchtepa Powerbank", addr:"Uchtepa, 15-uy", type:"power", status:"open", dist:2.8, power:"30W", ports:12, avail:8, price:"2500 so'm/soat", lat:41.3110, lng:69.1960, rating:4.2, speed:"USB-C / MicroUSB", img:null },
-  { id:7, name:"Bektemir EV Plaza", addr:"Bektemir, Sanoat ko'ch.", type:"ev", status:"closed", dist:4.2, power:"50 kW", ports:4, avail:0, price:"2200 so'm/kWh", lat:41.2386, lng:69.3478, rating:4.0, speed:"Tez zaryadlash", img:null },
-  { id:8, name:"Olmazor Skuter", addr:"Olmazor, Bog'bon ko'ch.", type:"scooter", status:"busy", dist:1.2, power:"10 kW", ports:6, avail:1, price:"1000 so'm/soat", lat:41.3580, lng:69.2280, rating:4.6, speed:"Standart", img:null },
-];
+// API Configuration
+const API_BASE_URL = 'http://localhost:5000/api';
+let authToken = null;
+let refreshToken = null;
+let currentUser = null;
 
+// Station data (will be loaded from API)
+let stations = [];
+
+// State
 let activeFilter = 'all';
 let activeStatus = 'all';
 let activeDist = 'any';
 let selectedId = null;
 let currentPhone = '';
-let userName = 'Jasur Karimov';
+let userName = '';
 let selectedSlot = '10:00';
 let selectedDur = 1;
 
-function sendSms() {
+// ================= AUTH FUNCTIONS =================
+async function sendSms() {
   const ph = document.getElementById('phoneInput').value.replace(/\s/g,'');
   if(ph.length < 9) { showToastRed('Telefon raqamni to\'liq kiriting'); return; }
   currentPhone = ph;
-  document.getElementById('stepPhone').classList.add('hidden');
-  document.getElementById('stepOtp').classList.remove('hidden');
-  document.getElementById('step1dot').style.background='var(--green)';
-  document.getElementById('step2dot').style.background='var(--green)';
-  document.getElementById('otpSub').textContent='+998 '+ph.slice(0,2)+' *** ** **'+' ga yuborildi';
-  setTimeout(()=>document.getElementById('otp1').focus(),100);
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/auth/send-otp`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone: ph })
+    });
+    
+    const data = await response.json();
+    
+    if(data.success) {
+      document.getElementById('stepPhone').classList.add('hidden');
+      document.getElementById('stepOtp').classList.remove('hidden');
+      document.getElementById('step1dot').style.background='var(--green)';
+      document.getElementById('step2dot').style.background='var(--green)';
+      document.getElementById('otpSub').textContent='+998 '+ph.slice(0,2)+' *** ** **'+' ga yuborildi';
+      setTimeout(()=>document.getElementById('otp1').focus(),100);
+      showToast('SMS kod yuborildi');
+    } else {
+      showToastRed(data.message || 'Xatolik yuz berdi');
+    }
+  } catch(error) {
+    console.error('Send SMS error:', error);
+    // Fallback for demo without backend
+    document.getElementById('stepPhone').classList.add('hidden');
+    document.getElementById('stepOtp').classList.remove('hidden');
+    document.getElementById('step1dot').style.background='var(--green)';
+    document.getElementById('step2dot').style.background='var(--green)';
+    document.getElementById('otpSub').textContent='+998 '+ph.slice(0,2)+' *** ** **'+' ga yuborildi';
+    setTimeout(()=>document.getElementById('otp1').focus(),100);
+    showToast('SMS kod yuborildi (Demo mode)');
+  }
 }
 
 function otpDigitsOnly(str) { return (str||'').replace(/\D/g,''); }
