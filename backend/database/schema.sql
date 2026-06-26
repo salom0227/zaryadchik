@@ -67,12 +67,6 @@ CREATE INDEX IF NOT EXISTS idx_bookings_status ON bookings(status);
 CREATE INDEX IF NOT EXISTS idx_bookings_booking_time ON bookings(booking_time);
 CREATE INDEX IF NOT EXISTS idx_bookings_code ON bookings(booking_code);
 
--- YANGI: Kartalar va to'lovlar indekslari
-CREATE INDEX IF NOT EXISTS idx_user_cards_user_id ON user_cards(user_id);
-CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
-CREATE INDEX IF NOT EXISTS idx_payments_card_id ON payments(card_id);
-CREATE INDEX IF NOT EXISTS idx_payments_booking_id ON payments(booking_id);
-
 -- Create function to update updated_at timestamp
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -143,3 +137,5 @@ CREATE INDEX IF NOT EXISTS idx_user_cards_user_id ON user_cards(user_id);
 CREATE INDEX IF NOT EXISTS idx_payments_user_id ON payments(user_id);
 CREATE INDEX IF NOT EXISTS idx_payments_card_id ON payments(card_id);
 CREATE INDEX IF NOT EXISTS idx_payments_booking_id ON payments(booking_id);
+CREATE INDEX IF NOT EXISTS idx_otp_codes_phone ON otp_codes(phone);
+CREATE INDEX IF NOT EXISTS idx_otp_codes_expires_at ON otp_codes(expires_at);

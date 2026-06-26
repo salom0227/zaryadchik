@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const http = require('http');
 const { Server } = require('socket.io');
 const path = require('path');
+const multer = require('multer');
 
 const logger = require('./utils/logger');
 const pool = require('./config/database');
@@ -64,9 +65,18 @@ app.use((err, req, res, next) => {
     });
   }
   
+  // Handle validation errors from express-validator
+  if (err.errors && Array.isArray(err.errors)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validatsiya xatosi',
+      errors: err.errors.map(e => e.msg)
+    });
+  }
+  
   res.status(err.status || 500).json({
     success: false,
-    message: err.message || 'Internal server error'
+    message: err.message || 'Ichki server xatosi'
   });
 });
 
